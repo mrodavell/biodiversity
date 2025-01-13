@@ -14,7 +14,7 @@ import bioBg from '../../../assets/biodiversity-gif.gif';
 import { BiMapPin } from "react-icons/bi";
 
 type TSampleData = {
-    coordinates: LatLngExpression[];
+    coordinates: LatLngExpression;
     popup: string;
 }
 
@@ -24,27 +24,27 @@ export default function Landing() {
 
     const sampleData: TSampleData[] = [
         {
-            coordinates: [[8.485833, 124.657950]],
+            coordinates: [8.485833, 124.657950],
             popup: 'Crab-eating Frog'
         },
         {
-            coordinates: [[8.486464, 124.657043]],
+            coordinates: [8.486464, 124.657043],
             popup: 'Banded bullfrog'
         },
         {
-            coordinates: [[8.487902, 124.656479]],
+            coordinates: [8.487902, 124.656479],
             popup: 'Lesser Grass Blue'
         },
         {
-            coordinates: [[8.610100, 124.887058]],
+            coordinates: [8.610100, 124.887058],
             popup: 'Metallic Cerulean'
         },
         {
-            coordinates: [[8.610200, 124.889158]],
+            coordinates: [8.610200, 124.889158],
             popup: 'Brown Pansy'
         },
         {
-            coordinates: [[8.609300, 124.889278]],
+            coordinates: [8.609300, 124.889278],
             popup: 'Alingatong'
         }
     ]
@@ -64,7 +64,7 @@ export default function Landing() {
     const [searchKeyword, setSearchKeyword] = useState<string>('');
     const [filteredData, setFilteredData] = useState<TSampleData[]>([]);
     const [dropVisible, setDropVisible] = useState<boolean>(false);
-    const [imageModal, setImageModal] = useState<boolean>(false);
+    // const [imageModal, setImageModal] = useState<boolean>(false);
 
     const handleChangeCampus = (index: string) => {
         setIsShowMap(false);
@@ -94,15 +94,13 @@ export default function Landing() {
 
     const handleSelectItem = (value: TSampleData) => {
         setSearchKeyword(value.popup)
-        const lat = (value.coordinates[0] as [number, number])[0];
-        const long = (value.coordinates[0] as [number, number])[1]
-        setCoordinates([lat, long]);
+        setCoordinates(value.coordinates);
         setDropVisible(false);
     }
 
-    const handleImageModal = () => {
-        setImageModal(!imageModal);
-    }
+    // const handleImageModal = () => {
+    //     setImageModal(!imageModal);
+    // }
 
     useEffect(() => {
         setTimeout(() => {

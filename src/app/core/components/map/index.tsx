@@ -8,13 +8,13 @@ import schoolPin from '../../../../assets/schoolmap-pin.png'
 import { campuses } from '../../constants/campuses';
 
 type TSampleData = {
-    coordinates: LatLngExpression[];
+    coordinates: LatLngExpression;
     icon: L.Icon;
     popup: string;
 }
 
 type MapComponentProps = {
-    coordinates: number[];
+    coordinates: LatLngExpression;
     zoom: number;
     handleModal?: (data: TSampleData) => void;
 };
@@ -41,9 +41,10 @@ const schoolIcon = L.icon({
 
 const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal }) => {
 
-    const MoveTo = ({ lat, long }: { lat: number, long: number }) => {
+    console.log('coordinates', coordinates)
+    const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
-        map.setView([lat, long], zoom);
+        map.setView(coordinates, zoom);
         return null;
     }
 
@@ -55,32 +56,32 @@ const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal })
 
     const sampleData: TSampleData[] = [
         {
-            coordinates: [[8.485833, 124.657950]],
+            coordinates: [8.485833, 124.657950],
             icon: customIcon,
             popup: 'Crab-eating Frog'
         },
         {
-            coordinates: [[8.486464, 124.657043]],
+            coordinates: [8.486464, 124.657043],
             icon: customIcon,
             popup: 'Banded bullfrog'
         },
         {
-            coordinates: [[8.487902, 124.656479]],
+            coordinates: [8.487902, 124.656479],
             icon: customIcon,
             popup: 'Lesser Grass Blue'
         },
         {
-            coordinates: [[8.610100, 124.887058]],
+            coordinates: [8.610100, 124.887058],
             icon: customIcon,
             popup: 'Metallic Cerulean'
         },
         {
-            coordinates: [[8.610200, 124.889158]],
+            coordinates: [8.610200, 124.889158],
             icon: customIcon,
             popup: 'Brown Pansy'
         },
         {
-            coordinates: [[8.609300, 124.889278]],
+            coordinates: [8.609300, 124.889278],
             icon: customIcon,
             popup: 'Alingatong'
         }
@@ -88,7 +89,7 @@ const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal })
 
     return (
         <div className="w-full h-screen">
-            <MapContainer center={[coordinates[0], coordinates[1]]} zoom={17} scrollWheelZoom={true} zoomControl={false}>
+            <MapContainer center={coordinates} zoom={17} scrollWheelZoom={true} zoomControl={false}>
                 <TileLayer
                     url={osmMaptiler.maptiler.url}
                     attribution={osmMaptiler.maptiler.attribution}
@@ -97,7 +98,7 @@ const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal })
                     sampleData.map((data, index) => {
                         return <Marker
                             key={index}
-                            position={data.coordinates[0]}
+                            position={data.coordinates}
                             icon={data.icon}
                             eventHandlers={{
                                 click: () => handleMarkerClick(data)
@@ -127,7 +128,7 @@ const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal })
                     ))
                 }
                 <ZoomControl position='bottomright' />
-                <MoveTo lat={coordinates[0]} long={coordinates[1]} />
+                <MoveTo coordinates={coordinates} />
             </MapContainer>
         </div>
     )
