@@ -1,4 +1,4 @@
-import FileDropzone from "../FileDropzone";
+import FileDropzone from "../filedropzone";
 import { formatBytes } from "../../helpers/file";
 import { FC, Fragment, useEffect, useState } from "react";
 import { FaFile, FaFileAlt, FaTrash } from "react-icons/fa";

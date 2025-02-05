@@ -1,6 +1,6 @@
 // Import dependencies
 import { FC, ReactNode, MouseEvent, ChangeEvent, FocusEvent, Fragment, useState, useEffect } from "react";
-import ErrorText from "../ErrorText";
+import ErrorText from "../errortext";
 import classNames from "classnames";
 
 // Define the props type for the TextField component
