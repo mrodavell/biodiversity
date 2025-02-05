@@ -7,13 +7,6 @@ export const campuses = [
     zoom: 17,
   },
   {
-    campus: "Balubal",
-    school: "USTP Balubal Campus",
-    address: "Cagayan de Oro City",
-    coordinates: [8.4606375, 124.7835275],
-    zoom: 17,
-  },
-  {
     campus: "Cagayan de Oro",
     school: "USTP Cagayan de Oro Campus",
     address: "Cagayan de Oro City",
@@ -35,6 +28,13 @@ export const campuses = [
     zoom: 18,
   },
   {
+    campus: "Oroquieta",
+    school: "USTP Oroquieta Campus",
+    address: "Oroquieta City",
+    coordinates: [8.4980851, 123.7866686],
+    zoom: 18,
+  },
+  {
     campus: "Panaon",
     school: "USTP Panaon Campus",
     address: "Misamis Occidental",
@@ -42,10 +42,10 @@ export const campuses = [
     zoom: 17,
   },
   {
-    campus: "Oroquieta",
-    school: "USTP Oroquieta Campus",
-    address: "Oroquieta City",
-    coordinates: [8.4980851, 123.7866686],
+    campus: "Villanueva",
+    school: "USTP Villanueva Campus",
+    address: "Villanueva, Misamis Oriental",
+    coordinates: [8.5600872, 124.8108076],
     zoom: 18,
   },
 ];
