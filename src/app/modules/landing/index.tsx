@@ -58,7 +58,7 @@ export default function Landing() {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [isShowMap, setIsShowMap] = useState<boolean>(false);
     const toggleShowModal = () => setShowModal(!showModal);
-    const [coordinates, setCoordinates] = useState<LatLngExpression>([8.485833, 124.656297]);
+    const [coordinates, setCoordinates] = useState<LatLngExpression>([8.521414, 124.434229]);
     const [zoom, setZoom] = useState<number>(17);
     const toggleShowPanel = () => setShowPanel(!showPanel);
     const [searchKeyword, setSearchKeyword] = useState<string>('');
