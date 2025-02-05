@@ -18,8 +18,6 @@ type TSampleData = {
     popup: string;
 }
 
-
-
 export default function Landing() {
 
     const sampleData: TSampleData[] = [
