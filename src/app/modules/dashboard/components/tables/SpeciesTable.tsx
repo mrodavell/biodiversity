@@ -1,11 +1,10 @@
 import DataTable, { TableColumn } from "react-data-table-component";
-import { ISpecies } from "../../../core/interfaces/common.interface";
+import { ISpecies } from "../../../../core/interfaces/common.interface";
 import { FaPlusCircle, FaRegEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
-import { FC } from "react";
+import { Fragment, useState } from "react";
+import Modal from "../../../../core/components/modal";
+import NewSpeciesForm from "../forms/SpeciesForm";
 
-type SpeciesTableProps = {
-    toggleModal: () => void;
-}
 
 const AvatarPlaceholder = (value: ISpecies) => {
     return <div className="text-sm text-center text-black  bg-slate-400 h-max p-2 min-w-9 rounded-full">
@@ -17,9 +16,10 @@ const Avatar = (value: ISpecies) => {
     return <img src={value.avatar} alt={value.commonName} className="w-14 h-14 rounded-full avatar" />
 }
 
-const SpeciesTable: FC<SpeciesTableProps> = ({
-    toggleModal
-}) => {
+const SpeciesTable = () => {
+
+    const [addSpeciesModal, setAddSpeciesModal] = useState<boolean>(false);
+    const toggleSpeciesModal = () => setAddSpeciesModal(!addSpeciesModal);
 
     const commonSetting = {
         sortable: true,
@@ -119,39 +119,49 @@ const SpeciesTable: FC<SpeciesTableProps> = ({
         }
     ]
 
-    return <div className="flex flex-1 flex-col w-full px-10 pt-4">
-        <div className="flex flex-row justify-between mb-4">
-            <div className="flex flex-row  w-1/3 justify-start">
-                <div className="flex flex-row items-center input input-bordered input-sm w-full">
-                    <input
-                        type="search"
-                        className="input input-sm w-full focus-within:border-none"
-                        placeholder="Search"
-                    />
-                    <span>
-                        <FaSearch />
-                    </span>
+    return <Fragment>
+        {
+            addSpeciesModal && (
+                <Modal title="New Species" isOpen={addSpeciesModal} onClose={toggleSpeciesModal} modalContainerClassName="max-w-7xl">
+                    <div>
+                        <NewSpeciesForm toggleModal={toggleSpeciesModal} />
+                    </div>
+                </Modal>
+            )
+        }
+        <div className="flex flex-1 flex-col w-full px-10 pt-4">
+            <div className="flex flex-row justify-between mb-4">
+                <div className="flex flex-row  w-1/3 justify-start">
+                    <div className="flex flex-row items-center input input-bordered input-sm w-full">
+                        <input
+                            type="search"
+                            className="input input-sm w-full focus-within:border-none"
+                            placeholder="Search"
+                        />
+                        <span>
+                            <FaSearch />
+                        </span>
+                    </div>
+                </div>
+                <div className="w-[25%] flex justify-end">
+                    <button
+                        className="btn btn-primary btn-sm"
+                        onClick={toggleSpeciesModal}
+                    >
+                        <FaPlusCircle className="mr-2" /> Add Species
+                    </button>
                 </div>
             </div>
-            <div className="w-[25%] flex justify-end">
-                <button
-                    className="btn btn-primary btn-sm"
-                    onClick={toggleModal}
-                >
-                    <FaPlusCircle className="mr-2" /> Add Species
-                </button>
+            <div>
+                <DataTable
+                    style={{ maxHeight: 'calc(100vh - 200px)' }}
+                    columns={columns}
+                    data={sampleData}
+                    pagination
+                />
             </div>
         </div>
-        <div className="border-[2px] px-4">
-            <DataTable
-                style={{ maxHeight: 'calc(100vh - 200px)' }}
-                columns={columns}
-                data={sampleData}
-                pagination
-            />
-        </div>
-    </div>
-
+    </Fragment>
 }
 
 export default SpeciesTable;

@@ -9,6 +9,10 @@ export const router = createBrowserRouter([
         element: <Landing />
     },
     {
+        path: "/campus/:campusId?",
+        element: <Landing />
+    },
+    {
         path: "/admin",
         element: <Admin />
     },
@@ -16,4 +20,13 @@ export const router = createBrowserRouter([
         path: "*",
         element: <Notfound />
     }
-])
+],
+    {
+        future: {
+            v7_relativeSplatPath: true, // Enables relative paths in nested routes
+            v7_fetcherPersist: true,   // Retains fetcher state during navigation
+            v7_normalizeFormMethod: true, // Normalizes form methods (e.g., POST or GET)
+            v7_partialHydration: true, // Supports partial hydration for server-side rendering
+            v7_skipActionErrorRevalidation: true, // Prevents revalidation when action errors occur
+        }
+    })

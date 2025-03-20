@@ -1,14 +1,26 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Auth from "../auth";
 import Dashboard from "../dashboard";
-import { IUser } from "../../core/interfaces/common.interface";
+import { supabase } from "../../core/lib/supabase";
+import { Session } from "@supabase/supabase-js";
 
 export default function Admin() {
 
-    const authUser = localStorage.getItem('authUser') as unknown as IUser ?? { isLoggedIn: false };
+    const [auth, setAuth] = useState<Session | null>(null);
+
+    const getUser = async () => {
+        const { data, error } = await supabase.auth.getSession();
+        if (!error) {
+            setAuth(data.session);
+        }
+    }
+
+    useEffect(() => {
+        getUser();
+    }, []);
 
     return <Fragment>
-        {authUser?.isLoggedIn === false && <Dashboard />}
-        {authUser?.isLoggedIn === true && <Auth />}
+        {auth && <Dashboard />}
+        {!auth && <Auth />}
     </Fragment>
 }

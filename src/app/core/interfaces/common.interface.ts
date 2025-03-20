@@ -3,6 +3,18 @@ export interface IUser {
   email: string;
   isLoggedIn: boolean;
 }
+export interface ICampus {
+  index?: number;
+  id?: number | string;
+  campus: string;
+  address: string;
+  longitude: number | string;
+  latitude: number | string;
+  zoom: number | string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
 
 export interface ISpecies {
   avatar?: string;
@@ -18,4 +30,7 @@ export interface ISpecies {
   ecologicalImportance?: string;
   longitude?: number;
   latitude?: number;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
 }

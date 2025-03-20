@@ -3,7 +3,6 @@ import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import MapComponent from "../../core/components/map";
 import { FaChevronCircleLeft, FaChevronCircleRight, FaExternalLinkAlt, FaSearch } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
-import { campuses } from "../../core/constants/campuses";
 import { FaUserLock } from "react-icons/fa6";
 import { LatLngExpression } from "leaflet";
 import Modal from "../../core/components/modal";
@@ -12,6 +11,8 @@ import frog2 from '../../../assets/frogs/bull_frog2.jpeg';
 import frog3 from '../../../assets/frogs/bull_frog3.jpeg';
 import bioBg from '../../../assets/biodiversity-gif.gif';
 import { BiMapPin } from "react-icons/bi";
+import { ICampus } from "../../core/interfaces/common.interface";
+import { useSystemStore } from "../../core/zustand/system";
 
 type TSampleData = {
     coordinates: LatLngExpression;
@@ -19,6 +20,10 @@ type TSampleData = {
 }
 
 export default function Landing() {
+
+    const { getCampuses } = useSystemStore();
+    const campuses = useSystemStore(state => state.campuses);
+    const campus = window.localStorage.getItem('campus');
 
     const sampleData: TSampleData[] = [
         {
@@ -64,15 +69,35 @@ export default function Landing() {
     const [dropVisible, setDropVisible] = useState<boolean>(false);
     // const [imageModal, setImageModal] = useState<boolean>(false);
 
-    const handleChangeCampus = (index: string) => {
-        setIsShowMap(false);
-        setTimeout(() => {
-            setIsShowMap(true);
-        }, 2000)
-        const targetIndex = parseInt(index);
-        setCoordinates([campuses[targetIndex].coordinates[0], campuses[targetIndex].coordinates[1]]);
-        setZoom(campuses[targetIndex].zoom ?? 17);
-        setSelectedCampus(index);
+    const initCampus = () => {
+        if (campus) {
+            setIsShowMap(false);
+            setTimeout(() => {
+                setIsShowMap(true);
+            }, 2000)
+            const campusData: ICampus = JSON.parse(campus);
+            const campusLongitude = campusData.longitude;
+            const campusLatitude = campusData.latitude;
+            setCoordinates([Number(campusLongitude), Number(campusLatitude)]);
+            setZoom(Number(campusData.zoom ?? 17));
+            setSelectedCampus(campusData.campus);
+        }
+    }
+
+    const handleChangeCampus = (selectedCampus: string) => {
+        console.log(selectedCampus);
+        const campusData = campuses.find(campus => campus.campus === selectedCampus);
+        console.log(campusData);
+        if (campusData) {
+            window.localStorage.setItem('campus', JSON.stringify(campusData));
+            setIsShowMap(false);
+            setTimeout(() => {
+                setIsShowMap(true);
+            }, 2000)
+            setCoordinates([Number(campusData.longitude), Number(campusData.latitude)]);
+            setZoom(Number(campusData.zoom ?? 17));
+            setSelectedCampus(campusData.campus);
+        }
     }
 
     const handleModal = (value: TSampleData) => {
@@ -100,10 +125,14 @@ export default function Landing() {
     //     setImageModal(!imageModal);
     // }
 
+    const getCampus = async () => {
+        getCampuses(false);
+        setIsShowMap(true);
+    }
+
     useEffect(() => {
-        setTimeout(() => {
-            setIsShowMap(true);
-        }, 5000)
+        getCampus();
+        initCampus();
     }, [])
 
     return (
@@ -178,7 +207,7 @@ export default function Landing() {
                         height: '100vh',
                         width: '100vw'
                     }}>
-                        <img src="" alt="" />
+
                     </div>
                 )
             }
@@ -250,11 +279,11 @@ export default function Landing() {
                                         <div className="flex flex-row items-center bg-white px-2 rounded-lg opacity-80">
                                             <BiMapPin color="red" size={20} className="ml-2" />
                                             <span className="mx-2">CAMPUS</span>
-                                            <select value={selectedCampus} className="select select-md min-w-52 !focus:border-none" onChange={(e) => handleChangeCampus(e.target.value)}>
+                                            <select value={selectedCampus} className="select select-md min-w-64 !focus:border-none" onChange={(e) => handleChangeCampus(e.target.value)}>
                                                 <option value="0" disabled>USTP Campuses</option>
                                                 {campuses.map((campus, index) => {
                                                     return (
-                                                        <option key={index} value={index}>{campus.campus}</option>
+                                                        <option key={index} value={campus.campus}>{campus.campus}</option>
                                                     )
                                                 })}
                                             </select>

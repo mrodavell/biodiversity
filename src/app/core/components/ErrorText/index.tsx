@@ -13,11 +13,11 @@ const ErrorText: FC<TErrorTextProps> = ({ text = "", withIcon = false }) => {
         <div className="flex flex-row pl-1 pt-2">
             {withIcon && <FaExclamationTriangle className="text-danger" size={14} />}
             {typeof text === 'string' &&
-                <span className="text-xs pl-2 text-danger">{text}</span>
+                <span className="text-xs pl-2 text-red-500">{text}</span>
             }
             {
                 typeof text !== 'string' &&
-                <span className="text-xs pl-2 text-danger">{joinArray([...text], ",")}</span>
+                <span className="text-xs pl-2 text-red-500">{joinArray([...text], ",")}</span>
             }
         </div>
     );

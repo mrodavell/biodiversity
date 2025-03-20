@@ -41,7 +41,6 @@ const schoolIcon = L.icon({
 
 const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal }) => {
 
-    console.log('coordinates', coordinates)
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
         map.setView(coordinates, zoom);

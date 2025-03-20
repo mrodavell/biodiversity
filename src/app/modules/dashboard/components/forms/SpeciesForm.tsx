@@ -1,13 +1,13 @@
 import { Form, FormikProvider, useFormik } from "formik";
 import { FC, useState } from "react";
-import { ISpecies } from "../../../core/interfaces/common.interface";
-import TextField from "../../../core/components/textfield";
-import { speciesSchema } from "../../../core/schema/speciesSchema";
-import ErrorText from "../../../core/components/errortext";
 import { FaMapLocation } from "react-icons/fa6";
 import { LuMapPin } from "react-icons/lu";
 import { FaCheckCircle } from "react-icons/fa";
-import Attachments from "../../../core/components/attachments";
+import { speciesSchema } from "../../../../core/schema/species.schema";
+import { ISpecies } from "../../../../core/interfaces/common.interface";
+import TextField from "../../../../core/components/textfield";
+import ErrorText from "../../../../core/components/errortext";
+import Attachments from "../../../../core/components/attachments";
 
 type NewSpeciesFormProps = {
     toggleModal: () => void;
