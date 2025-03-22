@@ -1,6 +1,6 @@
 import SpeciesTable from "./components/tables/SpeciesTable";
 import logo from '../../../assets/ustp-logo-on-white.png';
-import { FaSignOutAlt, FaUniversity } from "react-icons/fa";
+import { FaMapMarkedAlt, FaSignOutAlt, FaUniversity } from "react-icons/fa";
 import { Fragment } from "react/jsx-runtime";
 import { useState } from "react";
 import { supabase } from "../../core/lib/supabase";
@@ -8,9 +8,9 @@ import LoadingButton from "../../core/components/loadingbutton";
 import Tabs from "../../core/components/tabs";
 import { FaDatabase } from "react-icons/fa6";
 import CampusesTable from "./components/tables/CampusesTable";
+import CampusSpeciesTable from "./components/tables/CampusSpeciesTable";
 
 export default function Dashboard() {
-
 
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -56,15 +56,18 @@ export default function Dashboard() {
                             </LoadingButton>
                         </div>
                     </div>
-                    <div className="flex flex-1 mt-2 justify-start items-start px-2">
+                    <div className="flex flex-1 mt-2 justify-start items-start px-4">
                         <Tabs
                             className="w-full"
                             fullWidthHeader={false}
                             headers={[
+                                <span className="flex flex-row items-center text-sm hover:text-blue-500"><FaMapMarkedAlt className="mr-2" /> Mapping</span>,
                                 <span className="flex flex-row items-center text-sm hover:text-blue-500"><FaDatabase className="mr-2" /> Species</span>,
                                 <span className="flex flex-row items-center text-sm hover:text-blue-500"><FaUniversity className="mr-2" /> Campuses</span>
+
                             ]}
                             contents={[
+                                <CampusSpeciesTable />,
                                 <SpeciesTable />,
                                 <CampusesTable />
                             ]}

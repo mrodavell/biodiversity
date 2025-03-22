@@ -27,4 +27,11 @@ const joinArray = (arr: string[], separator: string): string => {
   return result;
 };
 
-export { joinArray };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatSelectOptions = (data: any[], keyValue: string) => {
+  return data.map((value) => {
+    return { value: value?.id, text: value[keyValue] };
+  });
+};
+
+export { joinArray, formatSelectOptions };

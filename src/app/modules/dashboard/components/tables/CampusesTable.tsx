@@ -1,36 +1,75 @@
 import DataTable, { TableColumn } from "react-data-table-component";
-import { ICampus } from "../../../../core/interfaces/common.interface";
+import { IActions, ICampus } from "../../../../core/interfaces/common.interface";
 import { FaArchive, FaCog, FaMapMarkerAlt, FaPlusCircle, FaRegEdit, FaSearch, FaTrashRestore, FaUniversity } from "react-icons/fa";
 import { Fragment, useEffect, useState } from "react";
-import { useSystemStore } from "../../../../core/zustand/system";
-import { supabase } from "../../../../core/lib/supabase";
-import { toast } from "react-toastify";
+import { useCampusStore } from "../../../../core/zustand/campus";
 import Loader from "../../../../core/components/loader";
 import CampusForm from "../forms/CampusForm";
 import Modal from "../../../../core/components/modal";
-import { getTimestamp } from "../../../../core/helpers/date";
-import Tooltip from "../../../../core/components/tooltip";
-import { confirmArchive, confirmRestore } from "../../../../core/helpers/alerts";
 import { FaMapLocation } from "react-icons/fa6";
+import { useDebounce } from "use-debounce";
+import ActionDropdown from "../../../../core/components/actiondropdown";
 
 
 const CampusesTable = () => {
 
-    const { setCampus, getCampuses } = useSystemStore();
-    const campuses = useSystemStore(state => state.campuses);
-    const fetching = useSystemStore(state => state.fetchingCampuses);
+    const { setCampus, getCampuses, deleteCampus, restoreCampus, searchCampuses } = useCampusStore();
+    const campuses = useCampusStore(state => state.campuses);
+    const processing = useCampusStore(state => state.processing);
 
     const [campusModal, setCampusModal] = useState<boolean>(false);
     const toggleCampusModal = () => setCampusModal(!campusModal);
     const [modalTitle, setModalTitle] = useState<string>('New Campus');
     const [action, setAction] = useState<string>('add');
     const [isIncludeArchived, setIsIncludeArchived] = useState<boolean>(false);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
 
-    const commonSetting = {
-        sortable: true,
-        reorder: true,
+    const commonSetting = {};
+
+    const getActionEvents = (species: ICampus): IActions<ICampus>[] => {
+        // check if allowed to edit with stepper     
+        const actions: IActions<ICampus>[] = [
+            {
+                name: "View",
+                event: (data: ICampus, index: number) => {
+                    handleView(data, index)
+                },
+                icon: <FaMapMarkerAlt className="text-red-500" />,
+                color: "primary",
+            },
+            {
+                name: "Edit",
+                event: (data: ICampus) => {
+                    handleEdit(data)
+                },
+                icon: <FaRegEdit className="text-blue-500" />,
+                color: "primary",
+            },
+            ...(species.deleted_at === null ? [
+                {
+                    name: "Archive",
+                    event: (data: ICampus) => {
+                        handleArchive(data)
+                    },
+                    icon: <FaArchive className="text-red-500" />,
+                    color: "danger",
+                }
+            ] : []),
+            ...(species.deleted_at !== null ? [
+                {
+                    name: "Restore",
+                    event: (data: ICampus) => {
+                        handleRestore(data)
+                    },
+                    icon: <FaTrashRestore className="text-info" />,
+                    color: "info",
+                }
+            ] : []),
+        ];
+
+        return actions;
     };
-
 
     const columns: TableColumn<ICampus>[] = [
         {
@@ -49,33 +88,17 @@ const CampusesTable = () => {
             ...commonSetting,
         },
         {
-            name: <span className="flex flex-1 justify-center"><FaCog className="mr-2" /> Actions</span>,
-            cell: (row, index) => <div className="flex flex-1 flex-row justify-center gap-x-2">
-                <Tooltip text='View Campus Location'>
-                    <button onClick={() => handleView(row, index)} className="btn btn-sm bg-zinc-300 text-center">
-                        <FaMapMarkerAlt className="text-red-500" />
-                    </button>
-                </Tooltip>
-                <Tooltip text='Edit Campus'>
-                    <button onClick={() => handleEdit(row)} className="btn btn-sm btn-primary text-center">
-                        <FaRegEdit />
-                    </button>
-                </Tooltip>
-                {row.deleted_at === null &&
-                    <Tooltip text='Archive Campus'>
-                        <button onClick={() => handleDelete(row)} className="btn btn-sm btn-error text-white">
-                            <FaArchive />
-                        </button>
-                    </Tooltip>
-                }
-                {row.deleted_at !== null &&
-                    <Tooltip text='Restore Campus'>
-                        <button onClick={() => handleRestore(row)} className="btn btn-sm btn-info text-white">
-                            <FaTrashRestore />
-                        </button>
-                    </Tooltip>
-                }
-            </div>,
+            name: <span className="flex flex-1 justify-center"><FaCog className="mr-2" />Actions</span>,
+            cell: (row, index) => {
+                return <div className="flex flex-1 justify-center">
+                    <ActionDropdown<ICampus>
+                        actions={getActionEvents(row)}
+                        rowIndex={index}
+                        data={row}
+                    />
+                </div>
+
+            }
         }
     ];
 
@@ -103,47 +126,12 @@ const CampusesTable = () => {
         toggleCampusModal();
     }
 
-    const handleDelete = async (row: ICampus) => {
-        try {
-
-            const confirm = await confirmArchive(`${row.campus} Campus`);
-
-            if (!confirm.isConfirmed) {
-                return;
-            }
-
-            const { error } = await supabase.from('campus').update({ deleted_at: getTimestamp() }).eq('id', row.id);
-            if (error) {
-                toast.error(error.message);
-                return;
-            }
-
-            toast.success('Campus deleted successfully!');
-            getCampus(isIncludeArchived);
-        } catch (error: unknown) {
-            toast.error(error as string)
-        }
+    const handleArchive = async (row: ICampus) => {
+        deleteCampus(row);
     }
 
     const handleRestore = async (row: ICampus) => {
-        try {
-            const confirm = await confirmRestore(`${row.campus} Campus`);
-
-            if (!confirm.isConfirmed) {
-                return;
-            }
-
-            const { error } = await supabase.from('campus').update({ deleted_at: null }).eq('id', row.id);
-            if (error) {
-                toast.error(error.message);
-                return;
-            }
-
-            toast.success('Campus restored successfully!');
-            getCampus(isIncludeArchived);
-        } catch (error: unknown) {
-            toast.error(error as string)
-        }
+        restoreCampus(row);
     }
 
     const handleModal = () => {
@@ -154,9 +142,25 @@ const CampusesTable = () => {
         setIsIncludeArchived(checked);
     }
 
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
+
+    useEffect(() => {
+        if (debouncedSearchTerm) {
+            searchCampuses(debouncedSearchTerm);
+        } else {
+            getData();
+        }
+    }, [debouncedSearchTerm]);
+
+    const getData = async (isIncludeArchived = false) => {
+        await getCampus(isIncludeArchived);
+    }
+
     useEffect(() => {
         const fetchData = async () => {
-            await getCampus();
+            getData();
         };
         fetchData();
     }, [])
@@ -183,6 +187,7 @@ const CampusesTable = () => {
                             type="search"
                             className="input input-sm w-full focus-within:border-none"
                             placeholder="Search"
+                            onChange={handleSearchChange}
                         />
                         <span>
                             <FaSearch />
@@ -205,9 +210,10 @@ const CampusesTable = () => {
             <div className="flex flex-1 flex-col w-full">
                 <DataTable
                     style={{ maxHeight: 'calc(100vh - 200px)' }}
-                    className="min-w-full border-2 p-2"
+                    className="min-w-full h-[400px] border-2 px-2"
+                    customStyles={{ rows: { style: { cursor: 'pointer', padding: '10px' } } }}
                     columns={columns}
-                    progressPending={fetching}
+                    progressPending={processing}
                     progressComponent={<Loader text="Fetching records..." />}
                     data={campuses}
                     pagination

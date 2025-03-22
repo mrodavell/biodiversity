@@ -1,14 +1,11 @@
 import { Form, FormikProvider, useFormik } from "formik";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { ICampus } from "../../../../core/interfaces/common.interface";
 import TextField from "../../../../core/components/textfield";
 import { campusSchema } from "../../../../core/schema/campus.schema";
 import LoadingButton from "../../../../core/components/loadingbutton";
-import { supabase } from "../../../../core/lib/supabase";
-import { toast } from "react-toastify";
-import { useSystemStore } from "../../../../core/zustand/system";
-import dayjs from "dayjs";
+import { useCampusStore } from "../../../../core/zustand/campus";
 
 type NewCampusFormProps = {
     action: string;
@@ -17,8 +14,10 @@ type NewCampusFormProps = {
 
 const NewCampusForm: FC<NewCampusFormProps> = ({ toggleModal, action = 'add' }) => {
 
-    const [submitting, setSubmitting] = useState<boolean>(false);
-    const campus = useSystemStore(state => state.campus);
+
+    const { createCampus, editCampus } = useCampusStore();
+    const campus = useCampusStore(state => state.campus);
+    const submitting = useCampusStore(state => state.processing);
 
     const formik = useFormik({
         initialValues: campus || {
@@ -31,32 +30,13 @@ const NewCampusForm: FC<NewCampusFormProps> = ({ toggleModal, action = 'add' }) 
         validationSchema: campusSchema,
         onSubmit: async (values: ICampus) => {
             try {
-                setSubmitting(true);
                 if (action === 'edit') {
-                    const updated = { ...values, updated_at: dayjs().format('YYYY-MM-DD HH:mm:ss') };
-                    const { error } = await supabase.from('campus').update([updated]).eq('id', campus?.id);
-                    if (error) {
-                        toast.error(error.message);
-                        return;
-                    }
-
-                    toast.success('Campus updated successfully!');
+                    editCampus(values, toggleModal);
                 } else {
-                    const { error } = await supabase.from('campus').insert([values]);
-                    if (error) {
-                        toast.error(error.message);
-                        return;
-                    }
-
-                    toast.success('Campus added successfully!');
+                    createCampus(values, toggleModal);
                 }
-
-                toggleModal();
-
             } catch (error: unknown) {
                 console.error(error);
-            } finally {
-                setSubmitting(false);
             }
         }
     });

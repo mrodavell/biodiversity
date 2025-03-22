@@ -12,7 +12,7 @@ import frog3 from '../../../assets/frogs/bull_frog3.jpeg';
 import bioBg from '../../../assets/biodiversity-gif.gif';
 import { BiMapPin } from "react-icons/bi";
 import { ICampus } from "../../core/interfaces/common.interface";
-import { useSystemStore } from "../../core/zustand/system";
+import { useCampusStore } from "../../core/zustand/campus";
 
 type TSampleData = {
     coordinates: LatLngExpression;
@@ -21,8 +21,8 @@ type TSampleData = {
 
 export default function Landing() {
 
-    const { getCampuses } = useSystemStore();
-    const campuses = useSystemStore(state => state.campuses);
+    const { getCampuses } = useCampusStore();
+    const campuses = useCampusStore(state => state.campuses);
     const campus = window.localStorage.getItem('campus');
 
     const sampleData: TSampleData[] = [
@@ -295,6 +295,7 @@ export default function Landing() {
 
                             <main className="flex flex-1 z-10 overflow-hidden">
                                 <MapComponent
+                                    campuses={campuses}
                                     zoom={zoom}
                                     coordinates={coordinates}
                                     handleModal={handleModal}

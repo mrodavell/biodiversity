@@ -5,7 +5,7 @@ import { MapContainer, Marker, TileLayer, useMap, ZoomControl, Tooltip } from "r
 import osmMaptiler from '../../constants/osm-maptiler';
 import mapPin from '../../../../assets/map-pin.png'
 import schoolPin from '../../../../assets/schoolmap-pin.png'
-import { campuses } from '../../constants/campuses';
+import { ICampus } from '../../interfaces/common.interface';
 
 type TSampleData = {
     coordinates: LatLngExpression;
@@ -14,6 +14,7 @@ type TSampleData = {
 }
 
 type MapComponentProps = {
+    campuses: ICampus[];
     coordinates: LatLngExpression;
     zoom: number;
     handleModal?: (data: TSampleData) => void;
@@ -39,7 +40,8 @@ const schoolIcon = L.icon({
     shadowAnchor: [22, 94] // Anchor point for the shadow
 });
 
-const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal }) => {
+const MapComponent: FC<MapComponentProps> = ({ campuses, coordinates, zoom, handleModal }) => {
+
 
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
@@ -115,12 +117,12 @@ const MapComponent: FC<MapComponentProps> = ({ coordinates, zoom, handleModal })
                     campuses.map((campus, index) => (
                         <Marker
                             key={index}
-                            position={[campus.coordinates[0], campus.coordinates[1]]}
+                            position={[Number(campus.longitude), Number(campus.latitude)]}
                             icon={schoolIcon}
                         >
                             <Tooltip>
                                 <div>
-                                    <strong>{campus.school}</strong>
+                                    <strong>{campus.campus} Campus</strong>
                                 </div>
                             </Tooltip>
                         </Marker>

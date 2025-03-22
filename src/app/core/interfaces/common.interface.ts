@@ -1,10 +1,11 @@
+import { ReactNode } from "react";
+
 export interface IUser {
   userid: number;
   email: string;
   isLoggedIn: boolean;
 }
 export interface ICampus {
-  index?: number;
   id?: number | string;
   campus: string;
   address: string;
@@ -17,20 +18,47 @@ export interface ICampus {
 }
 
 export interface ISpecies {
-  avatar?: string;
-  species?: string;
+  id?: number | string;
+  gdriveid?: string;
+  avatarUrl?: string;
+  category?: string;
   commonName?: string;
   scientificName?: string;
+  kingdom?: string;
+  phylum?: string;
+  class?: string;
+  order?: string;
   family?: string;
+  genus?: string;
   description?: string;
-  foodDiet?: string;
+  diet?: string;
   habitats?: string;
   distribution?: string;
   iucnStatus?: string;
+  conservationStatus?: string;
   ecologicalImportance?: string;
-  longitude?: number;
-  latitude?: number;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
+}
+
+export interface ICampusSpecies {
+  id?: number | string;
+  campus: ICampus;
+  species: ISpecies;
+  longitude: number | string;
+  latitude: number | string;
+  zoom: number | string;
+  created_at?: string;
+  updated_at?: string;
+  deleted_at?: string;
+}
+
+export interface IActions<T> {
+  name: string;
+  event: (data: T, index: number) => void;
+  icon: ReactNode | ReactNode[];
+  color?: string;
+  disabled?: boolean;
+  buttonType?: "submit" | "button" | "reset";
 }

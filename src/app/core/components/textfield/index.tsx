@@ -28,6 +28,7 @@ type TTextFieldProps = {
     onChange?: (text: ChangeEvent<HTMLInputElement>) => void;
     onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
     onMouseOver?: (event: MouseEvent<HTMLElement>) => void;
+    onFocus?: (event: FocusEvent<HTMLElement>) => void;
 };
 
 /**
@@ -78,6 +79,7 @@ const TextField: FC<TTextFieldProps> = ({
     onChange,
     onBlur,
     onMouseOver,
+    onFocus,
 }) => {
     const [inputValue, setInputValue] = useState<string>("");
 
@@ -114,6 +116,7 @@ const TextField: FC<TTextFieldProps> = ({
                     onChange={handleChange}
                     onBlur={onBlur}
                     onMouseOver={onMouseOver}
+                    onFocus={onFocus}
                     readOnly={readOnly}
                     required={required}
                     max={type === "number" ? max : undefined}
