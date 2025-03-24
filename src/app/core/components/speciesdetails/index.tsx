@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { ISpecies } from '../../interfaces/common.interface';
 import SliderComponent from '../slider';
 import fallbackImage from "../../../../assets/fallback-image.jpg";
+import ImageModal from '../imagemodal';
 
 interface SpeciesProps {
     specie?: ISpecies;
@@ -10,8 +11,23 @@ interface SpeciesProps {
 const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
 
     const [imageLoaded, setImageLoaded] = React.useState<boolean>(false);
+    const [selectedImage, setSelectedImage] = React.useState<string>('');
+    const [imageModal, setImageModal] = React.useState<boolean>(false);
+    const toggleImageModal = () => setImageModal(!imageModal);
 
-    return (
+    const handleImageModal = (image: string) => {
+        console.log(image)
+        setSelectedImage(image);
+        toggleImageModal();
+    }
+
+    return <Fragment>
+        {imageModal && <ImageModal isOpen={imageModal} onClose={toggleImageModal}>
+            <div className="flex flex-col">
+                <img src={selectedImage} alt='Zoomed in avatar' className="w-[400px] h-full" />
+            </div>
+        </ImageModal>
+        }
         <div className="flex flex-col">
             <div className="grid grid-cols-4 gap-4">
                 <div className="p-3 flex flex-col">
@@ -28,6 +44,7 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                             onLoad={() => setImageLoaded(true)}
                             className={`hover:cursor-pointer hover:opacity-90 ${imageLoaded ? 'block' : 'hidden'}`}
                             onError={e => e.currentTarget.src = fallbackImage}
+                            onClick={() => handleImageModal(`https://drive.google.com/thumbnail?id=${specie?.gdriveid}&sz=w1000`)}
                         />
                     }
                     {
@@ -107,7 +124,7 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                 </div>
             </div>
         </div>
-    );
+    </Fragment>
 };
 
 export default SpeciesDetails;

@@ -36,7 +36,7 @@ const Modal: FC<Props> = ({
     return (
         <div ref={modalRef} id="custom-modal" tabIndex={-1} className={`fixed inset-0 z-50 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto ${className}`}>
             <div className="fixed inset-0 bg-black opacity-50"></div>
-            <div className={`relative w-full   max-h-full ${modalContainerClassName}`}>
+            <div className={`relative w-full  max-h-full ${modalContainerClassName}`}>
                 <div className="relative bg-white rounded-lg shadow">
                     {showHeader && (
                         <div className="flex items-center justify-between p-4 md:p-5 rounded-t border-gray-200">
