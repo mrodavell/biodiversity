@@ -64,6 +64,8 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
                 editSpecie(updated, toggleModal);
             } else {
                 createSpecie(updated, toggleModal);
+                formik.resetForm();
+                handleClearImage();
             }
         }
     });
@@ -109,9 +111,8 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
                                     required
                                 />
                                 <textarea
-                                    className="textarea textarea-bordered w-full min-h-[100px]"
+                                    className="textarea textarea-bordered w-full min-h-[100px] resize-none"
                                     placeholder="Description"
-                                    maxLength={200}
                                     name="description"
                                     value={formik.values.description}
                                     onChange={formik.handleChange}
@@ -123,21 +124,20 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
                             </div>
                             <div className="flex flex-row flex-[2] gap-4">
                                 <div className="flex flex-col flex-1 gap-4">
-
-                                    <TextField
-                                        placeholder="Common name"
-                                        name="commonName"
-                                        value={formik.values.commonName}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.commonName && formik.touched.commonName}
-                                        required
-                                    />
                                     <TextField
                                         placeholder="Scientific name"
                                         name="scientificName"
                                         value={formik.values.scientificName}
                                         onChange={formik.handleChange}
                                         error={!!formik.errors.scientificName && formik.touched.scientificName}
+                                        required
+                                    />
+                                    <TextField
+                                        placeholder="Common name"
+                                        name="commonName"
+                                        value={formik.values.commonName}
+                                        onChange={formik.handleChange}
+                                        error={!!formik.errors.commonName && formik.touched.commonName}
                                         required
                                     />
                                     <TextField
@@ -246,7 +246,7 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
                                 <FaTimesCircle size={12} />
                             </LoadingButton>
                             <LoadingButton type="submit" isLoading={submitting} className="btn btn-md !w-48 btn-primary">
-                                Submit
+                                {action === 'add' ? 'Submit' : 'Save'}
                                 <FaCheckCircle size={12} />
                             </LoadingButton>
                         </div>

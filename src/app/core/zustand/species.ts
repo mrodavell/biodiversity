@@ -19,6 +19,7 @@ type SpeciesActions = {
   setSpecie: (specie: ISpecies | null) => void;
   setSpecies: (species: ISpecies[]) => void;
   getSpecies: (isIncludeArchived: boolean) => void;
+  getSpecie: (id: string) => void;
   createSpecie: (data: ISpecies, callback?: () => void) => void;
   editSpecie: (data: ISpecies, callback?: () => void) => void;
   deleteSpecie: (data: ISpecies, callback?: () => void) => void;
@@ -52,7 +53,7 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
         response = await supabase
           .from(table)
           .select("*")
-          .order("id", { ascending: false })
+          .order("id", { ascending: true })
           .is("deleted_at", null);
       } else {
         response = await supabase.from(table).select("*");
@@ -67,6 +68,24 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
     } catch (error: unknown) {
       toast.error((error as Error).message);
       return null;
+    } finally {
+      set({ processing: false });
+    }
+  },
+  getSpecie: async (id: string) => {
+    try {
+      set({ processing: true });
+      const { data, error } = await supabase
+        .from(table)
+        .select("*")
+        .eq("id", id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      set({ specie: data[0] as ISpecies });
+    } catch (error: unknown) {
+      toast.error((error as Error).message);
     } finally {
       set({ processing: false });
     }
@@ -193,6 +212,7 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
         .from(table)
         .select("*")
         .eq("category", category)
+        .order("id", { ascending: false })
         .is("deleted_at", null);
       if (response.error) {
         toast.error(response.error.message);

@@ -16,12 +16,18 @@ type CampusSpecies = {
 type CampusSpeciesActions = {
   setCampusSpecie: (campusSpecie: ICampusSpecies | null) => void;
   setCampusSpecies: (campuseSpecies: ICampusSpecies[]) => void;
-  getCampusSpecies: (isIncludeArchived: boolean) => void;
+  getCampusSpecies: (
+    isIncludeArchived: boolean,
+    campusId?: string | number | null
+  ) => void;
   createCampusSpecie: (data: ICampusSpecies, callback?: () => void) => void;
   editCampusSpecie: (data: ICampusSpecies, callback?: () => void) => void;
   deleteCampusSpecie: (data: ICampusSpecies, callback?: () => void) => void;
   restoreCampusSpecie: (data: ICampusSpecies, callback?: () => void) => void;
-  searchCampusSpecies: (search: string) => void;
+  searchCampusSpecies: (
+    search: string,
+    campusId?: string | number | null
+  ) => void;
 };
 
 export const useCampusSpeciesStore = create<
@@ -32,18 +38,38 @@ export const useCampusSpeciesStore = create<
   processing: false,
   setCampusSpecie: (campusSpecie) => set({ campusSpecie }),
   setCampusSpecies: (campusSpecies) => set({ campusSpecies }),
-  getCampusSpecies: async (isIncludeArchived = false) => {
+  getCampusSpecies: async (isIncludeArchived = false, campusId = null) => {
     try {
       set({ processing: true });
       let response = null;
       if (!isIncludeArchived) {
-        response = await supabase
-          .from(table)
-          .select("*")
-          .order("campus", { ascending: true })
-          .is("deleted_at", null);
+        if (campusId) {
+          response = await supabase
+            .from(table)
+            .select("*, campusData:campus(*), speciesData:species(*)")
+            .order("campus", { ascending: true })
+            .eq("campus", campusId)
+            .is("deleted_at", null);
+        } else {
+          response = await supabase
+            .from(table)
+            .select("*, campusData:campus(*), speciesData:species(*)")
+            .order("campus", { ascending: true })
+            .is("deleted_at", null);
+        }
       } else {
-        response = await supabase.from(table).select("*");
+        if (campusId) {
+          response = await supabase
+            .from(table)
+            .select("*, campusData:campus(*), speciesData:species(*)")
+            .order("campus", { ascending: true })
+            .eq("campus", campusId);
+        } else {
+          response = await supabase
+            .from(table)
+            .select("*, campusData:campus(*), speciesData:species(*)")
+            .order("campus", { ascending: true });
+        }
       }
 
       if (response.error) {
@@ -107,7 +133,9 @@ export const useCampusSpeciesStore = create<
     try {
       set({ processing: true });
 
-      const confirm = await confirmArchive(`${data.campus}`);
+      const confirm = await confirmArchive(
+        `${data.speciesData?.commonName} from ${data.campusData?.campus}`
+      );
 
       if (!confirm.isConfirmed) {
         return;
@@ -138,7 +166,7 @@ export const useCampusSpeciesStore = create<
     try {
       set({ processing: true });
 
-      const confirm = await confirmRestore(`${data.campus}`);
+      const confirm = await confirmRestore(`${data.speciesData?.commonName}`);
 
       if (!confirm.isConfirmed) {
         return;
@@ -165,18 +193,30 @@ export const useCampusSpeciesStore = create<
       set({ processing: false });
     }
   },
-  searchCampusSpecies: async (search: string) => {
+  searchCampusSpecies: async (search: string, campusId = null) => {
     try {
       set({ processing: true });
-      const response = await supabase
-        .from(table)
-        .select("*")
-        .or(`campus.ilike.%${search}%,address.ilike.%${search}%`)
-        .is("deleted_at", null);
+      let response = null;
+      if (campusId) {
+        response = await supabase
+          .from(table)
+          .select("*")
+          .or(`campus.ilike.%${search}%,address.ilike.%${search}%`)
+          .eq("campus", campusId)
+          .is("deleted_at", null);
+      } else {
+        response = await supabase
+          .from(table)
+          .select("*")
+          .or(`campus.ilike.%${search}%,address.ilike.%${search}%`)
+          .is("deleted_at", null);
+      }
+
       if (response.error) {
         toast.error(response.error.message);
         return;
       }
+
       get().setCampusSpecies(response.data as ICampusSpecies[]);
     } catch (error: unknown) {
       toast.error((error as Error).message);

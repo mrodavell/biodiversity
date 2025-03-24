@@ -1,4 +1,5 @@
 import { FC } from "react";
+import fallbackImage from "../../../../assets/fallback-image.jpg";
 
 type AvatarProps = {
     avatar: string | null;
@@ -12,7 +13,7 @@ const Avatar: FC<AvatarProps> = ({ avatar, name }) => {
         </div>
     }
 
-    return <img src={avatar ?? ''} alt={name} className="w-14 h-14 rounded-full avatar" />
+    return <img src={avatar ?? ''} alt={name} className="w-14 h-14 rounded-full avatar hover:opacity-80 hover:cursor-pointer" onError={e => e.currentTarget.src = fallbackImage} />
 }
 
 export default Avatar;

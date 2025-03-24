@@ -50,6 +50,7 @@ export const useCampusStore = create<Campus & CampusActions>((set, get) => ({
       }
 
       get().setCampuses(response.data as ICampus[]);
+      return response;
     } catch (error: unknown) {
       toast.error((error as Error).message);
       return null;

@@ -5,5 +5,4 @@ export const campusSpeciesSchema = Yup.object().shape({
   species: Yup.string().required("Species is required"),
   longitude: Yup.number().required("Longitude is required"),
   latitude: Yup.number().required("Latitude is required"),
-  zoom: Yup.number().required("Latitude is required"),
 });

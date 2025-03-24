@@ -1,5 +1,5 @@
 // Import dependencies
-import { FC, MouseEvent, ChangeEvent, FocusEvent, useState, Fragment } from "react";
+import { FC, MouseEvent, ChangeEvent, FocusEvent, useState, Fragment, useEffect } from "react";
 import ErrorText from "../errortext";
 import classNames from "classnames";
 
@@ -69,6 +69,7 @@ const Select: FC<TSelectProps> = ({
     onClick = () => { },
     onBlur = () => { },
 }) => {
+
     const [selected, setSelected] = useState<string | number>(value ?? "");
     // Generate the CSS classes for the select element based on props
     const selectClass = classNames(`select w-full select-bordered select-${variant}`, `select-${size}`, { "select-error": error }, className);
@@ -78,12 +79,16 @@ const Select: FC<TSelectProps> = ({
         setSelected(e.target.value);
     };
 
+    useEffect(() => {
+        setSelected(value ?? "");
+    }, [value])
+
     return (
         <Fragment>
             <select
                 name={name}
                 id={id}
-                // value={selected ?? ""}
+                value={selected ?? ""}
                 onChange={handleChange}
                 defaultValue={selected ?? ""}
                 className={selectClass}

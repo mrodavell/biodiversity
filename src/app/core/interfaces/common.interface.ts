@@ -44,11 +44,12 @@ export interface ISpecies {
 
 export interface ICampusSpecies {
   id?: number | string;
-  campus: ICampus;
-  species: ISpecies;
+  campus: string;
+  campusData?: ICampus;
+  species: string;
+  speciesData?: ISpecies;
   longitude: number | string;
   latitude: number | string;
-  zoom: number | string;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
@@ -61,4 +62,14 @@ export interface IActions<T> {
   color?: string;
   disabled?: boolean;
   buttonType?: "submit" | "button" | "reset";
+}
+
+export interface IImages {
+  id?: number | string;
+  imageUrl?: string;
+  sourceType?: string;
+  species: ISpecies;
+  speciesData?: ISpecies;
+  updated_at?: string;
+  deleted_at?: string;
 }

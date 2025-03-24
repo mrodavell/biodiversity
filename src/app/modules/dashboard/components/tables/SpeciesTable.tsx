@@ -1,7 +1,7 @@
 import DataTable, { TableColumn } from "react-data-table-component";
 import { IActions, ISpecies } from "../../../../core/interfaces/common.interface";
-import { FaArchive, FaCog, FaImage, FaListAlt, FaPlusCircle, FaRegEdit, FaSearch, FaTrashRestore } from "react-icons/fa";
-import { Fragment, useEffect, useState } from "react";
+import { FaArchive, FaCog, FaImage, FaImages, FaListAlt, FaPlusCircle, FaRegEdit, FaSearch, FaTrashRestore } from "react-icons/fa";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useSpeciesStore } from "../../../../core/zustand/species";
 import Loader from "../../../../core/components/loader";
 import Modal from "../../../../core/components/modal";
@@ -10,21 +10,26 @@ import SpeciesForm from "../forms/SpeciesForm";
 import ActionDropdown from "../../../../core/components/actiondropdown";
 import { useDebounce } from 'use-debounce';
 import { TbHierarchy2 } from "react-icons/tb";
-
+import SpeciesDetails from "../../../../core/components/speciesdetails";
 
 const SpeciesTable = () => {
 
     const { setSpecie, getSpecies, deleteSpecie, restoreSpecie, searchSpecies } = useSpeciesStore();
     const species = useSpeciesStore(state => state.species);
+    const specie = useSpeciesStore(state => state.specie);
     const processing = useSpeciesStore(state => state.processing);
 
-    const [campusModal, setCampusModal] = useState<boolean>(false);
-    const toggleSpeciesModal = () => setCampusModal(!campusModal);
+    const [speciesModal, setCampusModal] = useState<boolean>(false);
+    const toggleSpeciesModal = () => setCampusModal(!speciesModal);
     const [modalTitle, setModalTitle] = useState<string>('New Campus');
     const [action, setAction] = useState<string>('add');
     const [isIncludeArchived, setIsIncludeArchived] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+    const [addImagesModal, setAddImagesModal] = useState<boolean>(false);
+    const toggleAddImagesModal = () => setAddImagesModal(!addImagesModal);
+    const [speciesDetailsModal, setSpeciesDetailsModal] = useState<boolean>(false);
+    const toggleSpeciesDetailsModal = () => setSpeciesDetailsModal(!speciesDetailsModal);
 
     const commonSetting = {
     };
@@ -32,6 +37,24 @@ const SpeciesTable = () => {
     const getActionEvents = (species: ISpecies): IActions<ISpecies>[] => {
         // check if allowed to edit with stepper     
         const actions: IActions<ISpecies>[] = [
+            {
+                name: "View Details",
+                event: (data: ISpecies) => {
+                    setSpecie(data);
+                    toggleSpeciesDetailsModal();
+                },
+                icon: <FaListAlt className="text-info" />,
+                color: "primary",
+            },
+            {
+                name: "Add Images",
+                event: (data: ISpecies) => {
+                    setSpecie(data);
+                    toggleAddImagesModal();
+                },
+                icon: <FaImages className="text-green-500" />,
+                color: "primary",
+            },
             {
                 name: "Edit",
                 event: (data: ISpecies) => {
@@ -103,7 +126,7 @@ const SpeciesTable = () => {
         },
         {
             name: <span className="flex flex-row"><FaListAlt className="mr-2" /> Description</span>,
-            cell: (row) => row.description,
+            cell: (row) => <span className="text-justify text-ellipsis max-h-20 min-h-20 overflow-clip">{row.description}</span>,
             width: "20%",
         },
         {
@@ -117,6 +140,10 @@ const SpeciesTable = () => {
             }
         }
     ];
+
+    const getNewData = useMemo(() => async (isIncludeArchived = false) => {
+        await getData(isIncludeArchived);
+    }, []);
 
     const getData = async (isIncludeArchived = false) => {
         getSpecies(isIncludeArchived);
@@ -166,22 +193,39 @@ const SpeciesTable = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            await getData();
+            await getNewData();
         };
         fetchData();
     }, [])
 
     useEffect(() => {
-        getSpecies(isIncludeArchived);
+        getNewData(isIncludeArchived);
     }, [isIncludeArchived])
 
 
     return <Fragment>
         {
-            campusModal && (
-                <Modal title={modalTitle} isOpen={campusModal} onClose={toggleSpeciesModal} modalContainerClassName="max-w-5xl">
+            speciesModal && (
+                <Modal title={modalTitle} isOpen={speciesModal} onClose={toggleSpeciesModal} modalContainerClassName="max-w-5xl">
                     <div>
                         <SpeciesForm action={action} toggleModal={handleModal} />
+                    </div>
+                </Modal>
+            )
+        }
+        {
+            speciesDetailsModal && (
+                <Modal title={`${specie?.commonName}`} isOpen={speciesDetailsModal} onClose={toggleSpeciesDetailsModal} modalContainerClassName="max-w-5xl" titleClass="text-xl font-medium text-gray-900 ml-5">
+                    <SpeciesDetails specie={specie ?? undefined} />
+                </Modal>
+            )
+        }
+
+        {
+            addImagesModal && (
+                <Modal title="Captured Images" isOpen={addImagesModal} onClose={toggleAddImagesModal} modalContainerClassName="max-w-5xl">
+                    <div>
+
                     </div>
                 </Modal>
             )
@@ -193,7 +237,7 @@ const SpeciesTable = () => {
                         <input
                             type="search"
                             className="input input-sm w-full focus-within:border-none"
-                            placeholder="Search Common Name"
+                            placeholder="Search"
                             onChange={handleSearchChange}
                         />
                         <span>
@@ -221,7 +265,7 @@ const SpeciesTable = () => {
                     customStyles={{ rows: { style: { cursor: 'pointer', padding: '15px' } } }}
                     columns={columns}
                     progressPending={processing}
-                    progressComponent={<Loader text="Fetching records..." />}
+                    progressComponent={<div className="flex flex-1 h-[400px]"><Loader text="Fetching records..." /></div>}
                     data={species}
                     pagination
                     fixedHeader

@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TextField from '../textfield';
 import { FaChevronDown } from 'react-icons/fa6';
 import { FaChevronUp } from 'react-icons/fa';
 import { useDebouncedCallback } from 'use-debounce';
+import useOutsideClickListener from '../../hooks/useOutsideClickListener';
 
 interface AutocompleteProps {
+    placeholder?: string;
     selectedValue?: string;
     setSelectedValue?: (value: string) => void;
-    options: { value: string; text: string }[];
+    initialSelectedText?: string;
+    options?: { value: string; text: string }[];
     initialize?: () => void;
     onChange?: (value: string) => void;
+    width?: string;
+    height?: string;
 }
 
 const Autocomplete: React.FC<AutocompleteProps> = ({
@@ -17,14 +22,20 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     selectedValue = "",
     setSelectedValue,
     initialize,
-    onChange
+    initialSelectedText = "",
+    onChange,
+    height = '250px',
+    width = '20.5%',
+    placeholder = "Search"
 }) => {
 
+    const suggestionsRef = useRef(null);
     const [selectedText, setSelectedText] = useState<string>("");
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
+    const toggleShowSuggestions = () => setShowSuggestions(!showSuggestions);
+
     const handleOnChange = useDebouncedCallback((value: string) => {
-        console.log(value)
         setShowSuggestions(true);
         if (onChange) {
             onChange(value);
@@ -32,7 +43,6 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     }, 300);
 
     const handleSelectedValue = (text: string, value: string) => {
-        console.log({ text, value });
         if (setSelectedValue) {
             setSelectedValue(value);
         }
@@ -47,9 +57,15 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     }
 
+    useEffect(() => {
+        setSelectedText(initialSelectedText);
+    }, [initialSelectedText]);
+
+    useOutsideClickListener({ onOutsideClick: toggleShowSuggestions, ref: suggestionsRef, state: showSuggestions });
+
     const ResultListComponent = () => {
         return options.length ? (
-            <ul className="z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-left w-[calc(20.5%-2rem)]">
+            <ul ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-left w-[calc(${width}-2rem)] max-h-[${height}] overflow-x-hidden overflow-y-scroll`}>
                 {options.map((value) => {
                     let className;
                     if (value.value === selectedValue) {
@@ -63,7 +79,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
                 })}
             </ul>
         ) : (
-            <div className="z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-center w-[calc(20.5%-2rem)]">
+            <div ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-center w-[calc(${width}-2rem)]`}>
                 <em>No options available.</em>
             </div>
         );
@@ -73,7 +89,8 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         <div className="autocomplete flex flex-col flex-1 ">
             <TextField
                 className='input-sm'
-                type="search"
+                placeholder={placeholder}
+                type="text"
                 onChange={e => handleOnChange(e.target.value)}
                 onFocus={handleFocus}
                 value={selectedText}

@@ -1,201 +1,146 @@
 import { Fragment, useEffect, useState } from "react";
 import USTPLogo from '../../../assets/ustp-logo-on-white.png';
 import MapComponent from "../../core/components/map";
-import { FaChevronCircleLeft, FaChevronCircleRight, FaExternalLinkAlt, FaSearch } from "react-icons/fa";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import { IoMenu } from "react-icons/io5";
 import { FaUserLock } from "react-icons/fa6";
-import { LatLngExpression } from "leaflet";
-import Modal from "../../core/components/modal";
-import frog1 from '../../../assets/frogs/bull_frog1.jpeg';
-import frog2 from '../../../assets/frogs/bull_frog2.jpeg';
-import frog3 from '../../../assets/frogs/bull_frog3.jpeg';
 import bioBg from '../../../assets/biodiversity-gif.gif';
 import { BiMapPin } from "react-icons/bi";
-import { ICampus } from "../../core/interfaces/common.interface";
 import { useCampusStore } from "../../core/zustand/campus";
-
-type TSampleData = {
-    coordinates: LatLngExpression;
-    popup: string;
-}
+import { useSearchParams } from "react-router-dom";
+import Modal from "../../core/components/modal";
+import SpeciesDetails from "../../core/components/speciesdetails";
+import { ICampusSpecies } from "../../core/interfaces/common.interface";
+import Autocomplete from "../../core/components/autocomplete";
+import { supabase } from "../../core/lib/supabase";
+import { toast } from "react-toastify";
 
 export default function Landing() {
 
+    const [searchParams] = useSearchParams();
+    const campusId = searchParams.get('campusId');
+    const coordinatesParams = searchParams.get('coordinates');
     const { getCampuses } = useCampusStore();
     const campuses = useCampusStore(state => state.campuses);
-    const campus = window.localStorage.getItem('campus');
-
-    const sampleData: TSampleData[] = [
-        {
-            coordinates: [8.485833, 124.657950],
-            popup: 'Crab-eating Frog'
-        },
-        {
-            coordinates: [8.486464, 124.657043],
-            popup: 'Banded bullfrog'
-        },
-        {
-            coordinates: [8.487902, 124.656479],
-            popup: 'Lesser Grass Blue'
-        },
-        {
-            coordinates: [8.610100, 124.887058],
-            popup: 'Metallic Cerulean'
-        },
-        {
-            coordinates: [8.610200, 124.889158],
-            popup: 'Brown Pansy'
-        },
-        {
-            coordinates: [8.609300, 124.889278],
-            popup: 'Alingatong'
-        }
-    ]
-
-
+    // const { getCampusSpecies } = useCampusSpeciesStore();
+    // const campusSpecies = useCampusSpeciesStore(state => state.campusSpecies);
+    const [selectedCampusId, setSelectedCampusId] = useState<string | number | undefined>("");
+    const [speciesModal, setSpeciesModal] = useState<boolean>(false);
+    const toggleSpeciesModal = () => setSpeciesModal(!speciesModal);
+    const [campusSpecies, setCampusSpecies] = useState<ICampusSpecies[]>([]);
+    const [specie, setSpecie] = useState<ICampusSpecies | null>(null);
+    const [options, setOptions] = useState<{ value: string; text: string }[] | undefined>([]);
+    const [filterdOptions, setFilteredOptions] = useState<{ value: string; text: string }[] | undefined | null>(null);
 
     const date = new Date();
-    const [selectSampleData, setSelectedSampleData] = useState<TSampleData | undefined>(undefined);
-    const [selectedCampus, setSelectedCampus] = useState<string>('');
     const [showPanel, setShowPanel] = useState<boolean>(false);
-    const [showModal, setShowModal] = useState<boolean>(false);
+    // const [showModal, setShowModal] = useState<boolean>(false);
     const [isShowMap, setIsShowMap] = useState<boolean>(false);
-    const toggleShowModal = () => setShowModal(!showModal);
-    const [coordinates, setCoordinates] = useState<LatLngExpression>([8.521414, 124.434229]);
-    const [zoom, setZoom] = useState<number>(17);
+    // const toggleShowModal = () => setShowModal(!showModal);
     const toggleShowPanel = () => setShowPanel(!showPanel);
-    const [searchKeyword, setSearchKeyword] = useState<string>('');
-    const [filteredData, setFilteredData] = useState<TSampleData[]>([]);
-    const [dropVisible, setDropVisible] = useState<boolean>(false);
-    // const [imageModal, setImageModal] = useState<boolean>(false);
 
     const initCampus = () => {
-        if (campus) {
-            setIsShowMap(false);
-            setTimeout(() => {
-                setIsShowMap(true);
-            }, 2000)
-            const campusData: ICampus = JSON.parse(campus);
-            const campusLongitude = campusData.longitude;
-            const campusLatitude = campusData.latitude;
-            setCoordinates([Number(campusLongitude), Number(campusLatitude)]);
-            setZoom(Number(campusData.zoom ?? 17));
-            setSelectedCampus(campusData.campus);
+        if (campusId) {
+            setSelectedCampusId(campusId);
+        } else {
+            setSelectedCampusId(campuses[0]?.id);
         }
     }
 
-    const handleChangeCampus = (selectedCampus: string) => {
-        console.log(selectedCampus);
-        const campusData = campuses.find(campus => campus.campus === selectedCampus);
-        console.log(campusData);
+    const handleChangeCampus = (value: string) => {
+        const campusData = campuses.find(campus => campus.id?.toString() === value.toString());
         if (campusData) {
-            window.localStorage.setItem('campus', JSON.stringify(campusData));
-            setIsShowMap(false);
-            setTimeout(() => {
-                setIsShowMap(true);
-            }, 2000)
-            setCoordinates([Number(campusData.longitude), Number(campusData.latitude)]);
-            setZoom(Number(campusData.zoom ?? 17));
-            setSelectedCampus(campusData.campus);
+            window.location.href = `?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}`;
         }
     }
 
-    const handleModal = (value: TSampleData) => {
-        setShowModal(true);
-        setSelectedSampleData(value)
-        console.log(value);
-    }
+    const getCampusSpecies = async (campusId: string | number | undefined) => {
+        const table = "campus_species";
+        try {
+            const response = await supabase
+                .from(table)
+                .select("*, campusData:campus(*), speciesData:species(*)")
+                .order("campus", { ascending: true })
+                .eq("campus", campusId)
+                .is("deleted_at", null);
 
-    const handleSearch = (value: string) => {
-        if (value === "") {
-            setDropVisible(false)
+            if (response.error) {
+                toast.error(response.error.message);
+                return;
+            }
+            return response.data as ICampusSpecies[];
+        } catch (error: unknown) {
+            toast.error((error as Error).message);
+            return null;
         }
-        setSearchKeyword(value);
-        const filtered = sampleData.filter((item) => item.popup.toLowerCase().includes(value.toLowerCase()));
-        setFilteredData(filtered);
     }
 
-    const handleSelectItem = (value: TSampleData) => {
-        setSearchKeyword(value.popup)
-        setCoordinates(value.coordinates);
-        setDropVisible(false);
+    const fetchSpecies = async () => {
+        let campusSpeciesData: ICampusSpecies[] = [];
+        if (campusId) {
+            campusSpeciesData = await getCampusSpecies(campusId) ?? [];
+        } else {
+            campusSpeciesData = await getCampusSpecies(campuses[0]?.id) ?? [];
+        }
+        setCampusSpecies(campusSpeciesData);
+        const result = campusSpeciesData.map((specie) => {
+            if (specie.id) {
+                return { value: (specie?.id ?? '').toString(), text: specie.speciesData?.commonName ?? "" };
+            }
+            return undefined;
+        }).filter((item): item is { value: string; text: string } => item !== undefined);
+
+        if (result.length > 0) {
+            setOptions(result);
+        }
     }
 
-    // const handleImageModal = () => {
-    //     setImageModal(!imageModal);
-    // }
-
-    const getCampus = async () => {
+    const getData = async () => {
         getCampuses(false);
+        fetchSpecies();
         setIsShowMap(true);
+        initCampus();
+    }
+
+    const handleModal = (data: ICampusSpecies) => {
+        setSpecie(data);
+        toggleSpeciesModal();
+    }
+
+    const handleChangeAutocomplete = (value: string) => {
+        if (value === "") {
+            setFilteredOptions(null);
+            return;
+        }
+        const filteredOptions = options?.filter((item) => {
+            return item.text.toLowerCase().includes(value.toLowerCase());
+        });
+        setFilteredOptions(filteredOptions);
+    }
+
+    const handleSelectedValue = (value: string) => {
+        const selectedCampusSpecie = campusSpecies.find((specie) => specie.id?.toString() === value);
+        if (selectedCampusSpecie) {
+            window.location.href = `?campusId=${selectedCampusSpecie.campus}&coordinates=${selectedCampusSpecie.longitude},${selectedCampusSpecie.latitude}`;
+        }
     }
 
     useEffect(() => {
-        getCampus();
-        initCampus();
-    }, [])
+        getData();
+    }, []);
+
+    useEffect(() => {
+        fetchSpecies();
+    }, [coordinatesParams])
 
     return (
         <Fragment>
-            {showModal &&
-                <Modal title={selectSampleData?.popup} isOpen={showModal} onClose={toggleShowModal} modalContainerClassName="max-w-4xl">
-                    <div className="flex flex-1 flex-col gap-2">
-                        <div className="flex flex-row">
-                            <span className="text-lg font-semibold">Scientific name: </span><span className="text-lg ml-2">Kaloula pulchra</span>
-                        </div>
-                        <div className="flex flex-row">
-                            <span className="text-lg font-semibold">Habitat: </span><span className="text-lg ml-2">Forest floors, Rice fields</span>
-                        </div>
-                        <span className="text-lg font-semibold">Description: </span>
-                        <p>
-                            This medium-sized frog can grow up to 6.8 cm long. It has a deep, narrow head with distinctive folds and warts across the back and head.
-                            The snout is pointed and resembles a beak. Its body color ranges from brown or greenish-brown to gray, with darker markings.
-                            Both the lips and legs are barred, featuring irregular darker bars. The belly is white and may have some dark spots.
-                        </p>
-                        <div className="divider"></div>
-                        <div className="flex flex-1 flex-row justify-center gap-4">
-                            <button>
-                                <FaChevronCircleLeft size={20} />
-                            </button>
-                            <img src={frog1} alt="Bull Frog 1" width={250} height={200} />
-                            <img src={frog2} alt="Bull Frog 1" width={250} height={200} />
-                            <img src={frog3} alt="Bull Frog 1" width={250} height={200} />
-                            <button>
-                                <FaChevronCircleRight size={20} />
-                            </button>
-                        </div>
-                    </div>
-                </Modal>
-            }
             {
-                <Modal title={selectSampleData?.popup} isOpen={showModal} onClose={toggleShowModal} modalContainerClassName="max-w-4xl">
-                    <div className="flex flex-1 flex-col gap-2">
-                        <div className="flex flex-row">
-                            <span className="text-lg font-semibold">Scientific name: </span><span className="text-lg ml-2">Kaloula pulchra</span>
-                        </div>
-                        <div className="flex flex-row">
-                            <span className="text-lg font-semibold">Habitat: </span><span className="text-lg ml-2">Forest floors, Rice fields</span>
-                        </div>
-                        <span className="text-lg font-semibold">Description: </span>
-                        <p>
-                            This medium-sized frog can grow up to 6.8 cm long. It has a deep, narrow head with distinctive folds and warts across the back and head.
-                            The snout is pointed and resembles a beak. Its body color ranges from brown or greenish-brown to gray, with darker markings.
-                            Both the lips and legs are barred, featuring irregular darker bars. The belly is white and may have some dark spots.
-                        </p>
-                        <div className="divider"></div>
-                        <div className="flex flex-1 flex-row justify-center gap-4">
-                            <button>
-                                <FaChevronCircleLeft size={20} />
-                            </button>
-                            <img src={frog1} alt="Bull Frog 1" width={250} height={200} />
-                            <img src={frog2} alt="Bull Frog 1" width={250} height={200} />
-                            <img src={frog3} alt="Bull Frog 1" width={250} height={200} />
-                            <button>
-                                <FaChevronCircleRight size={20} />
-                            </button>
-                        </div>
-                    </div>
-                </Modal>
+                speciesModal && (
+                    <Modal title={`${specie?.speciesData?.commonName}`} isOpen={speciesModal} onClose={toggleSpeciesModal} modalContainerClassName="max-w-5xl" titleClass="text-xl font-medium text-gray-900 ml-5">
+                        <SpeciesDetails specie={specie?.speciesData ?? undefined} />
+                    </Modal>
+                )
             }
             {
                 !isShowMap && (
@@ -248,30 +193,20 @@ export default function Landing() {
                                         </button>
                                         <div className="flex flex-1 flex-col opacity-80">
                                             <div className="input input-bordered input-md w-[500px] ml-2 flex flex-row items-center">
-                                                <input
+                                                {/* <input
                                                     type="search"
                                                     className="input w-full focus-within:border-none"
-                                                    placeholder="Search"
-                                                    onChange={(e) => handleSearch(e.target.value)}
-                                                    value={searchKeyword}
-                                                    onFocus={() => setDropVisible(true)}
+                                                    placeholder="Search species in this campus"
                                                 />
-                                                <span><FaSearch /></span>
+                                                <span><FaSearch /></span> */}
+                                                <Autocomplete
+                                                    placeholder="Search species in this campus"
+                                                    options={filterdOptions ?? options}
+                                                    width="30%"
+                                                    onChange={(value) => handleChangeAutocomplete(value)}
+                                                    setSelectedValue={(value) => handleSelectedValue(value)}
+                                                />
                                             </div>
-                                            {filteredData.length > 0 && dropVisible && (
-                                                <ul className="menu w-[500px] bg-base-200 ml-2 shadow-lg">
-                                                    {filteredData.map((item, index) => (
-                                                        <li key={index} className="hover:bg-base-300">
-                                                            <button
-                                                                onClick={() => handleSelectItem(item)}
-                                                                className="w-full text-left"
-                                                            >
-                                                                {item.popup}
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            )}
                                         </div>
 
                                     </div>
@@ -279,11 +214,11 @@ export default function Landing() {
                                         <div className="flex flex-row items-center bg-white px-2 rounded-lg opacity-80">
                                             <BiMapPin color="red" size={20} className="ml-2" />
                                             <span className="mx-2">CAMPUS</span>
-                                            <select value={selectedCampus} className="select select-md min-w-64 !focus:border-none" onChange={(e) => handleChangeCampus(e.target.value)}>
+                                            <select value={selectedCampusId} className="select select-md min-w-64 !focus:border-none" onChange={(e) => handleChangeCampus(e.target.value)}>
                                                 <option value="0" disabled>USTP Campuses</option>
                                                 {campuses.map((campus, index) => {
                                                     return (
-                                                        <option key={index} value={campus.campus}>{campus.campus}</option>
+                                                        <option key={index} value={campus.id}>{campus.campus}</option>
                                                     )
                                                 })}
                                             </select>
@@ -296,8 +231,6 @@ export default function Landing() {
                             <main className="flex flex-1 z-10 overflow-hidden">
                                 <MapComponent
                                     campuses={campuses}
-                                    zoom={zoom}
-                                    coordinates={coordinates}
                                     handleModal={handleModal}
                                 />
                             </main>

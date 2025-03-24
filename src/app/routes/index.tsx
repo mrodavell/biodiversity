@@ -9,7 +9,7 @@ export const router = createBrowserRouter([
         element: <Landing />
     },
     {
-        path: "/campus/:campusId?",
+        path: "/campus/:campusName",
         element: <Landing />
     },
     {

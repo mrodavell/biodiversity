@@ -214,7 +214,7 @@ const CampusesTable = () => {
                     customStyles={{ rows: { style: { cursor: 'pointer', padding: '10px' } } }}
                     columns={columns}
                     progressPending={processing}
-                    progressComponent={<Loader text="Fetching records..." />}
+                    progressComponent={<div className="flex flex-1 h-[400px]"><Loader text="Fetching records..." /></div>}
                     data={campuses}
                     pagination
                     fixedHeader
