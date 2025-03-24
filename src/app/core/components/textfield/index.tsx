@@ -1,6 +1,5 @@
 // Import dependencies
 import { FC, ReactNode, MouseEvent, ChangeEvent, FocusEvent, Fragment, useState, useEffect } from "react";
-import ErrorText from "../errortext";
 import classNames from "classnames";
 
 // Define the props type for the TextField component
@@ -71,7 +70,6 @@ const TextField: FC<TTextFieldProps> = ({
     className = "",
     error = false,
     errorText,
-    errorIcon = false,
     size = "md",
     variant = "primary",
     label = "",
@@ -126,7 +124,7 @@ const TextField: FC<TTextFieldProps> = ({
                 {/* {rightIcon && rightIcon} Render right icon if provided */}
             </label>
             {/* Render ErrorText component if error is true */}
-            {error && <ErrorText text={errorText} withIcon={errorIcon} />}
+            {error && <span className="text-xs pl-2 text-red-500">{errorText}</span>}
         </Fragment>
     );
 };

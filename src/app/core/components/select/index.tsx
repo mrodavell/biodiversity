@@ -1,6 +1,5 @@
 // Import dependencies
 import { FC, MouseEvent, ChangeEvent, FocusEvent, useState, Fragment, useEffect } from "react";
-import ErrorText from "../errortext";
 import classNames from "classnames";
 
 type TOptions = {
@@ -64,7 +63,6 @@ const Select: FC<TSelectProps> = ({
     disabled = false,
     error = false,
     errorText,
-    errorIcon = false,
     onChange = () => { },
     onClick = () => { },
     onBlur = () => { },
@@ -111,7 +109,7 @@ const Select: FC<TSelectProps> = ({
                 })}
             </select>
             {/* Displays error message if error prop is true */}
-            {error && <ErrorText text={errorText} withIcon={errorIcon} />}
+            {error && <span className="text-xs pl-2 text-red-500">{errorText}</span>}
         </Fragment>
     );
 };

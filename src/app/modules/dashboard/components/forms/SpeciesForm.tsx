@@ -4,7 +4,6 @@ import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { speciesSchema } from "../../../../core/schema/species.schema";
 import { ISpecies } from "../../../../core/interfaces/common.interface";
 import TextField from "../../../../core/components/textfield";
-import ErrorText from "../../../../core/components/errortext";
 import { toast } from "react-toastify";
 import Select from "../../../../core/components/select";
 import { useSpeciesStore } from "../../../../core/zustand/species";
@@ -119,7 +118,7 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
                                     required
                                 ></textarea>
                                 {!!formik.errors.description && formik.touched.description &&
-                                    <ErrorText text={formik.errors.description} />
+                                    <span className="text-xs pl-2 text-red-500">{formik.errors.description}</span>
                                 }
                             </div>
                             <div className="flex flex-row flex-[2] gap-4">

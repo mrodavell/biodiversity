@@ -7,7 +7,6 @@ import {
     useState,
     useEffect,
 } from "react";
-import ErrorText from "../errortext";
 import classNames from "classnames";
 
 // Define the props type for the CheckBox component
@@ -70,7 +69,6 @@ const CheckBox: FC<TCheckBoxProps> = ({
     size = "sm",
     error = false,
     errorText,
-    errorIcon = false,
     onBlur,
     onClick = () => { },
     onChange = () => { },
@@ -142,7 +140,7 @@ const CheckBox: FC<TCheckBoxProps> = ({
                 }
             </label>
             {
-                error && <ErrorText text={errorText} withIcon={errorIcon} /> // Render the error text if there's an error
+                error && <span className="text-xs pl-2 text-red-500">{errorText}</span>// Render the error text if there's an error
             }
         </div>
     );
