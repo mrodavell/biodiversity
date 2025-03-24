@@ -6,11 +6,10 @@ import { IoMenu } from "react-icons/io5";
 import { FaUserLock } from "react-icons/fa6";
 import bioBg from '../../../assets/biodiversity-gif.gif';
 import { BiMapPin } from "react-icons/bi";
-import { useCampusStore } from "../../core/zustand/campus";
 import { useSearchParams } from "react-router-dom";
 import Modal from "../../core/components/modal";
 import SpeciesDetails from "../../core/components/speciesdetails";
-import { ICampusSpecies } from "../../core/interfaces/common.interface";
+import { ICampus, ICampusSpecies } from "../../core/interfaces/common.interface";
 import Autocomplete from "../../core/components/autocomplete";
 import { supabase } from "../../core/lib/supabase";
 import { toast } from "react-toastify";
@@ -19,14 +18,14 @@ export default function Landing() {
 
     const [searchParams] = useSearchParams();
     const campusId = searchParams.get('campusId');
-    const coordinatesParams = searchParams.get('coordinates');
-    const { getCampuses } = useCampusStore();
-    const campuses = useCampusStore(state => state.campuses);
+    // const { getCampuses } = useCampusStore();
+    // const campuses = useCampusStore(state => state.campuses);
     // const { getCampusSpecies } = useCampusSpeciesStore();
     // const campusSpecies = useCampusSpeciesStore(state => state.campusSpecies);
     const [selectedCampusId, setSelectedCampusId] = useState<string | number | undefined>("");
     const [speciesModal, setSpeciesModal] = useState<boolean>(false);
     const toggleSpeciesModal = () => setSpeciesModal(!speciesModal);
+    const [campuses, setCampuses] = useState<ICampus[]>([]);
     const [campusSpecies, setCampusSpecies] = useState<ICampusSpecies[]>([]);
     const [specie, setSpecie] = useState<ICampusSpecies | null>(null);
     const [options, setOptions] = useState<{ value: string; text: string }[] | undefined>([]);
@@ -47,10 +46,30 @@ export default function Landing() {
         }
     }
 
-    const handleChangeCampus = (value: string) => {
-        const campusData = campuses.find(campus => campus.id?.toString() === value.toString());
-        if (campusData) {
-            window.location.href = `?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}`;
+
+    const getCampuses = async () => {
+        const table = "campus";
+        try {
+            const response = await supabase
+                .from(table)
+                .select("*")
+                .order("campus", { ascending: true })
+                .is("deleted_at", null);
+
+            if (response.error) {
+                toast.error(response.error.message);
+                return;
+            }
+
+            setCampuses(() => response.data as ICampus[]);
+            if (campusId) {
+                fetchSpecies(campusId);
+            } else {
+                fetchSpecies(response.data[0]?.id);
+            }
+        } catch (error: unknown) {
+            toast.error((error as Error).message);
+            return null;
         }
     }
 
@@ -75,13 +94,8 @@ export default function Landing() {
         }
     }
 
-    const fetchSpecies = async () => {
-        let campusSpeciesData: ICampusSpecies[] = [];
-        if (campusId) {
-            campusSpeciesData = await getCampusSpecies(campusId) ?? [];
-        } else {
-            campusSpeciesData = await getCampusSpecies(campuses[0]?.id) ?? [];
-        }
+    const fetchSpecies = async (campusId: string) => {
+        const campusSpeciesData = await getCampusSpecies(campusId) ?? [];
         setCampusSpecies(campusSpeciesData);
         const result = campusSpeciesData.map((specie) => {
             if (specie.id) {
@@ -95,16 +109,17 @@ export default function Landing() {
         }
     }
 
-    const getData = async () => {
-        getCampuses(false);
-        fetchSpecies();
-        setIsShowMap(true);
-        initCampus();
-    }
 
     const handleModal = (data: ICampusSpecies) => {
         setSpecie(data);
         toggleSpeciesModal();
+    }
+
+    const handleChangeCampus = (value: string) => {
+        const campusData = campuses.find(campus => campus.id?.toString() === value.toString());
+        if (campusData) {
+            window.location.href = `?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}`;
+        }
     }
 
     const handleChangeAutocomplete = (value: string) => {
@@ -125,13 +140,16 @@ export default function Landing() {
         }
     }
 
+    const getData = async () => {
+        await getCampuses();
+        setIsShowMap(true);
+        initCampus();
+    }
+
+
     useEffect(() => {
         getData();
     }, []);
-
-    useEffect(() => {
-        fetchSpecies();
-    }, [coordinatesParams])
 
     return (
         <Fragment>
@@ -231,6 +249,7 @@ export default function Landing() {
                             <main className="flex flex-1 z-10 overflow-hidden">
                                 <MapComponent
                                     campuses={campuses}
+                                    campusSpecies={campusSpecies}
                                     handleModal={handleModal}
                                 />
                             </main>

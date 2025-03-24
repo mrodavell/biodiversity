@@ -8,9 +8,10 @@ import schoolPin from '../../../../assets/schoolmap-pin.png'
 import activePin from '../../../../assets/active-mark.png'
 import { ICampus, ICampusSpecies } from '../../interfaces/common.interface';
 import { useSearchParams } from 'react-router-dom';
-import { useCampusSpeciesStore } from '../../zustand/campus-species';
+
 type MapComponentProps = {
     campuses: ICampus[];
+    campusSpecies: ICampusSpecies[];
     handleModal: (data: ICampusSpecies) => void;
 };
 
@@ -44,19 +45,12 @@ const schoolIcon = L.icon({
     shadowAnchor: [22, 94] // Anchor point for the shadow
 });
 
-const MapComponent: FC<MapComponentProps> = ({ campuses, handleModal }) => {
+const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleModal }) => {
 
     const [searchParams] = useSearchParams();
     const campusId = searchParams.get('campusId');
     const coordinatesParams = searchParams.get('coordinates');
     const [coordinates, setCoordinates] = useState<LatLngExpression>([0, 0]);
-    const { getCampusSpecies } = useCampusSpeciesStore();
-    const campusSpecies = useCampusSpeciesStore(state => state.campusSpecies);
-
-
-    const fetchSpecies = async () => {
-        getCampusSpecies(false, campusId);
-    }
 
     useEffect(() => {
         if (campusId && coordinatesParams) {
@@ -66,11 +60,6 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, handleModal }) => {
             const campus = campuses[0];
             setCoordinates([Number(campus.longitude), Number(campus.latitude)]);
         }
-        async function fetchData() {
-            await fetchSpecies();
-        }
-
-        fetchData();
     }, [campusId, coordinatesParams]);
 
 
