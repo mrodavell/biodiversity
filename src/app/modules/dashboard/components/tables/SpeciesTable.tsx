@@ -11,6 +11,7 @@ import ActionDropdown from "../../../../core/components/actiondropdown";
 import { useDebounce } from 'use-debounce';
 import { TbHierarchy2 } from "react-icons/tb";
 import SpeciesDetails from "../../../../core/components/speciesdetails";
+import CapturedImagesForm from "../forms/CapturedImagesForm";
 
 const SpeciesTable = () => {
 
@@ -92,7 +93,10 @@ const SpeciesTable = () => {
         {
             name: <span className="flex flex-1 justify-center"><FaImage className="mr-2" /> Image</span>,
             cell: (row) => <div className="flex flex-1 justify-center">
-                <Avatar avatar={`https://drive.google.com/thumbnail?id=${row.gdriveid}&sz=w1000`} name={row.commonName ?? ''} />
+                <Avatar
+                    avatar={`https://drive.google.com/thumbnail?id=${row.gdriveid}&sz=w1000`}
+                    name={row.commonName ?? ''}
+                />
             </div>,
             style: {
                 textAlign: 'center'
@@ -223,10 +227,8 @@ const SpeciesTable = () => {
 
         {
             addImagesModal && (
-                <Modal title="Captured Images" isOpen={addImagesModal} onClose={toggleAddImagesModal} modalContainerClassName="max-w-5xl">
-                    <div>
-
-                    </div>
+                <Modal title={`Manage Captured Images for ${specie?.commonName}`} isOpen={addImagesModal} onClose={toggleAddImagesModal} modalContainerClassName="max-w-3xl">
+                    <CapturedImagesForm specie={specie ?? undefined} />
                 </Modal>
             )
         }

@@ -68,7 +68,7 @@ export interface IImages {
   id?: number | string;
   imageUrl?: string;
   sourceType?: string;
-  species: ISpecies;
+  species?: string | number;
   speciesData?: ISpecies;
   updated_at?: string;
   deleted_at?: string;

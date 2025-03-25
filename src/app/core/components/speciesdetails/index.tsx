@@ -1,8 +1,10 @@
-import React, { Fragment } from 'react';
-import { ISpecies } from '../../interfaces/common.interface';
+import React, { Fragment, useEffect, useState } from 'react';
+import { IImages, ISpecies } from '../../interfaces/common.interface';
 import SliderComponent from '../slider';
 import fallbackImage from "../../../../assets/fallback-image.jpg";
 import ImageModal from '../imagemodal';
+import { supabase } from '../../lib/supabase';
+import { toast } from 'react-toastify';
 
 interface SpeciesProps {
     specie?: ISpecies;
@@ -10,21 +12,47 @@ interface SpeciesProps {
 
 const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
 
+    const [images, setImages] = useState<IImages[]>([])
     const [imageLoaded, setImageLoaded] = React.useState<boolean>(false);
     const [selectedImage, setSelectedImage] = React.useState<string>('');
     const [imageModal, setImageModal] = React.useState<boolean>(false);
     const toggleImageModal = () => setImageModal(!imageModal);
 
     const handleImageModal = (image: string) => {
-        console.log(image)
         setSelectedImage(image);
         toggleImageModal();
     }
 
+    const getSpecieImages = async () => {
+        const table = 'species_images';
+        try {
+            const response = await supabase
+                .from(table)
+                .select("*, speciesData:species(*)")
+                .eq("species", specie?.id)
+                .order("id", { ascending: true })
+                .is("deleted_at", null);
+
+            if (response.error) {
+                toast.error(response.error.message);
+                return;
+            }
+
+            setImages(response.data);
+        } catch (error: unknown) {
+            toast.error((error as Error).message);
+            return null;
+        }
+    }
+
+    useEffect(() => {
+        getSpecieImages();
+    }, [])
+
     return <Fragment>
         {imageModal && <ImageModal isOpen={imageModal} onClose={toggleImageModal}>
             <div className="flex flex-col">
-                <img src={selectedImage} alt='Zoomed in avatar' className="w-[400px] h-full" />
+                <img src={selectedImage} alt='Zoomed in avatar' className="w-[450px] h-full" />
             </div>
         </ImageModal>
         }
@@ -119,7 +147,7 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                     <div className="divider"></div>
                     <div className="flex flex-1 flex-col">
                         <span className='text-lg font-semibold'>Captured Images</span>
-                        <SliderComponent />
+                        <SliderComponent items={images} />
                     </div>
                 </div>
             </div>

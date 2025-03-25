@@ -1,6 +1,6 @@
 import DataTable, { TableColumn } from "react-data-table-component";
 import { IActions, ICampusSpecies } from "../../../../core/interfaces/common.interface";
-import { FaArchive, FaCheckCircle, FaCog, FaMapMarkerAlt, FaPlusCircle, FaRegEdit, FaSearch, FaTrashRestore, FaUniversity } from "react-icons/fa";
+import { FaArchive, FaCheckCircle, FaCog, FaMapMarkerAlt, FaPlusCircle, FaRegEdit, FaTrashRestore, FaUniversity } from "react-icons/fa";
 import { Fragment, useEffect, useState } from "react";
 import { useCampusStore } from "../../../../core/zustand/campus";
 import Loader from "../../../../core/components/loader";
@@ -47,10 +47,11 @@ const CampusSpeciesTable = () => {
     const [initialAutocompleteText, setInitialAutocompleteText] = useState<string>('');
     const [action, setAction] = useState<string>('add');
     const [isIncludeArchived, setIsIncludeArchived] = useState<boolean>(false);
+    const [sortedCampus, setSortedCampus] = useState<string | null>(null);
 
     const getData = async (isIncludeArchived = false) => {
         getCampuses(isIncludeArchived);
-        getCampusSpecies(isIncludeArchived);
+        getCampusSpecies(isIncludeArchived, sortedCampus);
     }
 
 
@@ -102,6 +103,11 @@ const CampusSpeciesTable = () => {
         setSelectedCategory('');
         setInitialAutocompleteText('');
         formik.resetForm();
+    }
+
+    const handleSortByCampus = (campus: string) => {
+        setSortedCampus(campus);
+        getCampusSpecies(isIncludeArchived, campus);
     }
 
     useEffect(() => {
@@ -347,15 +353,13 @@ const CampusSpeciesTable = () => {
                     <div className="flex flex-[3] flex-col">
                         <div className="flex flex-row justify-between mb-4">
                             <div className="flex flex-row w-[40%] justify-start items-center">
-                                <div className="flex flex-row flex-1 items-center input input-bordered input-sm w-full mr-4">
-                                    <input
-                                        type="search"
-                                        className="input input-sm w-full focus-within:border-none"
-                                        placeholder="Search"
+                                <div className="flex flex-row flex-1 items-center w-full mr-4">
+                                    <Select
+                                        placeholder="Sort by Campus"
+                                        className="select-sm"
+                                        options={campusOptions}
+                                        onChange={e => handleSortByCampus(e.target.value)}
                                     />
-                                    <span>
-                                        <FaSearch />
-                                    </span>
                                 </div>
                                 <div className="flex flex-row flex-1 w-full items-center">
                                     <input type="checkbox" checked={isIncludeArchived} onChange={e => setIsIncludeArchived(e.target.checked)} className="checkbox checkbox-primary checkbox-sm" />
