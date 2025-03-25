@@ -61,9 +61,9 @@ const SliderComponent: FC<SliderComponentProps> = ({ items = [], allowEdit = fal
                     <FaChevronCircleLeft />
                 </button>
             )}
-            <div className="w-full h-44 gap-x-2 p-2 justify-start inline-flex items-center overflow-hidden" ref={elementRef}>
+            <div className="w-full h-40 gap-x-2 p-2 justify-start inline-flex items-center overflow-hidden" ref={elementRef}>
                 {items.length === 0 && (
-                    <div className="text-center flex flex-1 justify-center items-center border-[1px] rounded-md">
+                    <div className="text-center flex flex-1 justify-center items-center p-2 border-[1px] rounded-md">
                         <img src={fallbackImg} alt="No image found" className="w-36" />
                     </div>
                 )}

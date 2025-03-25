@@ -140,6 +140,14 @@ const CampusSpeciesTable = () => {
         // check if allowed to edit with stepper     
         const actions: IActions<ICampusSpecies>[] = [
             {
+                name: "View",
+                event: (data: ICampusSpecies) => {
+                    window.open(`/?campusId=${data.campus}&coordinates=${data.longitude},${data.latitude}`, '_blank');
+                },
+                icon: <FaMapMarkerAlt className="text-red-500" />,
+                color: "primary",
+            },
+            {
                 name: "Edit",
                 event: (data: ICampusSpecies) => {
                     const dataToEdit = {

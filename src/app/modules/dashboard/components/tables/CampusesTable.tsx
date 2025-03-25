@@ -32,8 +32,8 @@ const CampusesTable = () => {
         const actions: IActions<ICampus>[] = [
             {
                 name: "View",
-                event: (data: ICampus, index: number) => {
-                    handleView(data, index)
+                event: (data: ICampus) => {
+                    handleView(data)
                 },
                 icon: <FaMapMarkerAlt className="text-red-500" />,
                 color: "primary",
@@ -113,10 +113,8 @@ const CampusesTable = () => {
         toggleCampusModal();
     }
 
-    const handleView = (row: ICampus, index: number) => {
-        const updateRow = { ...row, index };
-        window.localStorage.setItem('campus', JSON.stringify(updateRow));
-        window.open(`/`, '_blank');
+    const handleView = (row: ICampus) => {
+        window.open(`/?campusId=${row.id}&coordinates=${row.latitude},${row.longitude}`, '_blank');
     }
 
     const handleEdit = (row: ICampus) => {
