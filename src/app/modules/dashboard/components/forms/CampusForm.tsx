@@ -6,6 +6,7 @@ import TextField from "../../../../core/components/textfield";
 import { campusSchema } from "../../../../core/schema/campus.schema";
 import LoadingButton from "../../../../core/components/loadingbutton";
 import { useCampusStore } from "../../../../core/zustand/campus";
+import { toast } from "react-toastify";
 
 type NewCampusFormProps = {
     action: string;
@@ -36,7 +37,7 @@ const NewCampusForm: FC<NewCampusFormProps> = ({ toggleModal, action = 'add' }) 
                     createCampus(values, toggleModal);
                 }
             } catch (error: unknown) {
-                console.error(error);
+                toast.error((error as Error).message);
             }
         }
     });

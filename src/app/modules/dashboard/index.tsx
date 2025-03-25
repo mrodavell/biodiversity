@@ -9,6 +9,7 @@ import Tabs from "../../core/components/tabs";
 import { FaDatabase } from "react-icons/fa6";
 import CampusesTable from "./components/tables/CampusesTable";
 import CampusSpeciesTable from "./components/tables/CampusSpeciesTable";
+import { toast } from "react-toastify";
 
 export default function Dashboard() {
 
@@ -22,7 +23,7 @@ export default function Dashboard() {
                 window.location.href = '/admin';
             }
         } catch (error: unknown) {
-            console.log(error);
+            toast.error((error as Error).message);
         } finally {
             setLoading(false);
         }

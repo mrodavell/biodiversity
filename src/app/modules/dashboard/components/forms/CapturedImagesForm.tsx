@@ -99,7 +99,6 @@ const CapturedImagesForm: FC<CapturedImagesFormProps> = ({ specie }) => {
         },
         validationSchema: speciesImagesSchema,
         onSubmit: async (values) => {
-            console.log(values)
             await createSpecieImage(values);
         }
     })

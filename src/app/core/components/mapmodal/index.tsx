@@ -62,8 +62,6 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
     const LongLatGetter = () => {
         useMapEvents({
             click: (e) => {
-                console.log(e.latlng.lat);
-                console.log(e.latlng.lng);
                 if (getLongLat) {
                     getLongLat([e.latlng.lat, e.latlng.lng]);
                 }

@@ -87,10 +87,7 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
                     {
                         campusSpecies.map((data, index) => {
                             const currentCoordinates = [Number(data.latitude), Number(data.longitude)];
-                            console.log('specie-coordinates', currentCoordinates)
-                            console.log('current', coordinates)
                             const isActiveMark = JSON.stringify(coordinates) === JSON.stringify(currentCoordinates);
-                            console.log(isActiveMark)
                             return <Marker
                                 key={index}
                                 position={[Number(data.latitude), Number(data.longitude)]}
