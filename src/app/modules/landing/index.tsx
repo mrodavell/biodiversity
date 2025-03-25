@@ -142,8 +142,10 @@ export default function Landing() {
 
     const getData = async () => {
         await getCampuses();
-        setIsShowMap(true);
         initCampus();
+        setTimeout(() => {
+            setIsShowMap(true);
+        }, 3000);
     }
 
 
