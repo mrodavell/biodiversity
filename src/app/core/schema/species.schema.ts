@@ -1,4 +1,5 @@
 import * as Yup from "yup";
+import { SpeciesCategory } from "../enums/species";
 
 export const speciesSchema = Yup.object().shape({
   category: Yup.string().required("Category is required"),
@@ -11,11 +12,28 @@ export const speciesSchema = Yup.object().shape({
   family: Yup.string().required("Family is required"),
   genus: Yup.string().required("Genus is required"),
   description: Yup.string().required("Description is required"),
-  diet: Yup.string().required("Diet is required"),
-  habitats: Yup.string().required("Habitats is required"),
-  distribution: Yup.string().required("Distribution is required"),
-  ecologicalImportance: Yup.string().required(
-    "Ecological importance is required"
-  ),
-  conservationStatus: Yup.string().required("Conservation status is required"),
+  diet: Yup.string().when("category", {
+    is: SpeciesCategory.BIRDS,
+    then: (schema) => schema.required("Diet is required"),
+  }),
+  habitats: Yup.string().when("category", {
+    is: SpeciesCategory.BIRDS,
+    then: (schema) => schema.required("Habitats is required"),
+  }),
+  distribution: Yup.string().when("category", {
+    is: SpeciesCategory.BIRDS,
+    then: (schema) => schema.required("Distribution is required"),
+  }),
+  conservationStatus: Yup.string().when("category", {
+    is: SpeciesCategory.BIRDS,
+    then: (schema) => schema.required("Conservation status is required"),
+  }),
+  ecologicalImportance: Yup.string().when("category", {
+    is: SpeciesCategory.BIRDS,
+    then: (schema) => schema.required("Ecological importance is required"),
+  }),
+  endemism: Yup.string().when("category", {
+    is: SpeciesCategory.TREES,
+    then: (schema) => schema.required("Endemism is required"),
+  }),
 });

@@ -27,7 +27,7 @@ const CampusSpeciesTable = () => {
 
     const { getCampuses } = useCampusStore();
     const { getSpeciesByCategory, searchSpeciesByCategory, getSpecie } = useSpeciesStore();
-    const { getCampusSpecies, createCampusSpecie, editCampusSpecie, deleteCampusSpecie, restoreCampusSpecie } = useCampusSpeciesStore();
+    const { getCampusSpecies, createCampusSpecie, editCampusSpecie, deleteCampusSpecie, restoreCampusSpecie, setCampusSpecies } = useCampusSpeciesStore();
     const processing = useCampusStore(state => state.processing);
     const categories = useSpeciesStore(state => state.categories);
     const campuses = useCampusStore(state => state.campuses);
@@ -105,9 +105,14 @@ const CampusSpeciesTable = () => {
         formik.resetForm();
     }
 
-    const handleSortByCampus = (campus: string) => {
+    const handleFilterByCampus = (campus: string) => {
         setSortedCampus(campus);
         getCampusSpecies(isIncludeArchived, campus);
+    }
+
+    const handleFilterByCategory = (category: string) => {
+        const filteredSpecies = campusSpecies.filter(species => species.speciesData?.category === category);
+        setCampusSpecies(filteredSpecies);
     }
 
     useEffect(() => {
@@ -360,13 +365,21 @@ const CampusSpeciesTable = () => {
                 <div className="col-span-6">
                     <div className="flex flex-[3] flex-col">
                         <div className="flex flex-row justify-between mb-4">
-                            <div className="flex flex-row w-[40%] justify-start items-center">
+                            <div className="flex flex-row w-[80%] justify-start items-center">
                                 <div className="flex flex-row flex-1 items-center w-full mr-4">
                                     <Select
-                                        placeholder="Sort by Campus"
+                                        placeholder="Filter by Campus"
                                         className="select-sm"
                                         options={campusOptions}
-                                        onChange={e => handleSortByCampus(e.target.value)}
+                                        onChange={e => handleFilterByCampus(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex flex-row flex-1 items-center w-full mr-4">
+                                    <Select
+                                        placeholder="Filter by Category"
+                                        className="select-sm"
+                                        options={categories}
+                                        onChange={e => handleFilterByCategory(e.target.value)}
                                     />
                                 </div>
                                 <div className="flex flex-row flex-1 w-full items-center">

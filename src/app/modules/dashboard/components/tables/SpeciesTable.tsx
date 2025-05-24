@@ -12,12 +12,14 @@ import { useDebounce } from 'use-debounce';
 import { TbHierarchy2 } from "react-icons/tb";
 import SpeciesDetails from "../../../../core/components/speciesdetails";
 import CapturedImagesForm from "../forms/CapturedImagesForm";
+import Select from "../../../../core/components/select";
 
 const SpeciesTable = () => {
 
-    const { setSpecie, getSpecies, deleteSpecie, restoreSpecie, searchSpecies } = useSpeciesStore();
+    const { setSpecie, getSpecies, deleteSpecie, restoreSpecie, searchSpecies, filterSpeciesByCategory } = useSpeciesStore();
     const species = useSpeciesStore(state => state.species);
     const specie = useSpeciesStore(state => state.specie);
+    const categories = useSpeciesStore(state => state.categories);
     const processing = useSpeciesStore(state => state.processing);
 
     const [speciesModal, setCampusModal] = useState<boolean>(false);
@@ -40,8 +42,8 @@ const SpeciesTable = () => {
         const actions: IActions<ISpecies>[] = [
             {
                 name: "View Details",
-                event: (data: ISpecies) => {
-                    setSpecie(data);
+                event: (data) => {
+                    setSpecie(data as ISpecies);
                     toggleSpeciesDetailsModal();
                 },
                 icon: <FaListAlt className="text-info" />,
@@ -49,8 +51,8 @@ const SpeciesTable = () => {
             },
             {
                 name: "Add Images",
-                event: (data: ISpecies) => {
-                    setSpecie(data);
+                event: (data) => {
+                    setSpecie(data as ISpecies);
                     toggleAddImagesModal();
                 },
                 icon: <FaImages className="text-green-500" />,
@@ -58,8 +60,8 @@ const SpeciesTable = () => {
             },
             {
                 name: "Edit",
-                event: (data: ISpecies) => {
-                    handleEdit(data)
+                event: (data) => {
+                    handleEdit(data as ISpecies)
                 },
                 icon: <FaRegEdit className="text-blue-500" />,
                 color: "primary",
@@ -67,8 +69,8 @@ const SpeciesTable = () => {
             ...(species.deleted_at === null ? [
                 {
                     name: "Archive",
-                    event: (data: ISpecies) => {
-                        handleArchive(data)
+                    event: (data: unknown) => {
+                        handleArchive(data as ISpecies)
                     },
                     icon: <FaArchive className="text-red-500" />,
                     color: "danger",
@@ -77,8 +79,8 @@ const SpeciesTable = () => {
             ...(species.deleted_at !== null ? [
                 {
                     name: "Restore",
-                    event: (data: ISpecies) => {
-                        handleRestore(data)
+                    event: (data: unknown) => {
+                        handleRestore(data as ISpecies)
                     },
                     icon: <FaTrashRestore className="text-info" />,
                     color: "info",
@@ -137,9 +139,9 @@ const SpeciesTable = () => {
             name: <span className="flex flex-1 justify-center"><FaCog className="mr-2" />Actions</span>,
             cell: (row, index) => {
                 return <ActionDropdown<ISpecies>
-                    actions={getActionEvents(row)}
+                    actions={getActionEvents(row as ISpecies)}
                     rowIndex={index}
-                    data={row}
+                    data={row as ISpecies}
                 />
             }
         }
@@ -186,6 +188,10 @@ const SpeciesTable = () => {
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(event.target.value);
     };
+
+    const handleChangeCategory = (category: string) => {
+        filterSpeciesByCategory(category);
+    }
 
     useEffect(() => {
         if (debouncedSearchTerm) {
@@ -234,7 +240,7 @@ const SpeciesTable = () => {
         }
         <div className="flex flex-1 flex-col w-full px-10 pt-4">
             <div className="flex flex-row justify-between mb-4">
-                <div className="flex flex-row w-[40%] justify-start items-center">
+                <div className="flex flex-row w-[80%] justify-start items-center">
                     <div className="flex flex-row flex-1 items-center input input-bordered input-sm w-full mr-4">
                         <input
                             type="search"
@@ -245,6 +251,14 @@ const SpeciesTable = () => {
                         <span>
                             <FaSearch />
                         </span>
+                    </div>
+                    <div className="flex flex-row flex-1 items-center w-full mr-4">
+                        <Select
+                            placeholder="Filter by Category"
+                            className="select-sm"
+                            options={categories}
+                            onChange={(e) => handleChangeCategory(e.target.value)}
+                        />
                     </div>
                     <div className="flex flex-row flex-1 w-full items-center">
                         <input type="checkbox" checked={isIncludeArchived} onChange={e => handleIsIncludeArchived(e.target.checked)} className="checkbox checkbox-primary checkbox-sm" />

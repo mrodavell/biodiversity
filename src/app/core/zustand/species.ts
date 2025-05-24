@@ -27,6 +27,7 @@ type SpeciesActions = {
   searchSpecies: (search: string) => void;
   getSpeciesByCategory: (category: string) => void;
   searchSpeciesByCategory: (category: string, keyword: string) => void;
+  filterSpeciesByCategory: (category: string) => void;
 };
 
 export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
@@ -38,6 +39,7 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
     { value: "Frogs", text: "Frogs" },
     { value: "Trees", text: "Trees" },
     { value: "Mangroves", text: "Mangroves" },
+    { value: "Macro_Inverts", text: "Macro Inverts" },
   ],
   speciesByCategory: [],
   species: [],
@@ -255,6 +257,26 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
         };
       });
       set({ speciesByCategory: formatted });
+    } catch (error: unknown) {
+      toast.error((error as Error).message);
+    } finally {
+      set({ processing: false });
+    }
+  },
+  filterSpeciesByCategory: async (category: string) => {
+    try {
+      set({ processing: true });
+      const response = await supabase
+        .from(table)
+        .select("*")
+        .eq("category", category)
+        .order("id", { ascending: false })
+        .is("deleted_at", null);
+      if (response.error) {
+        toast.error(response.error.message);
+        return;
+      }
+      get().setSpecies(response.data as ISpecies[]);
     } catch (error: unknown) {
       toast.error((error as Error).message);
     } finally {

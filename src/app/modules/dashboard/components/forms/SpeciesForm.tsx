@@ -2,12 +2,15 @@ import { Form, FormikProvider, useFormik } from "formik";
 import { FC, useEffect, useState } from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { speciesSchema } from "../../../../core/schema/species.schema";
-import { ISpecies } from "../../../../core/interfaces/common.interface";
 import TextField from "../../../../core/components/textfield";
 import { toast } from "react-toastify";
 import Select from "../../../../core/components/select";
 import { useSpeciesStore } from "../../../../core/zustand/species";
 import LoadingButton from "../../../../core/components/loadingbutton";
+import { animalsList, insectsList, plantsList } from "../../../../core/enums/species";
+import PlantsForm from "./PlantsForm";
+import AnimalsForm from "./AnimalsForm";
+import InsectsForm from "./InsectsForm";
 
 type NewSpeciesFormProps = {
     action: string;
@@ -48,16 +51,10 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
             family: '',
             genus: '',
             description: '',
-            diet: '',
-            habitats: '',
-            distribution: '',
-            iucnStatus: '',
-            conservationStatus: '',
-            ecologicalImportance: '',
-
+            details: undefined,
         },
         validationSchema: speciesSchema,
-        onSubmit: (values: ISpecies) => {
+        onSubmit: (values) => {
             const updated = { ...values, gdriveid: gDriveId };
             if (action === 'edit') {
                 editSpecie(updated, toggleModal);
@@ -69,13 +66,17 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
         }
     });
 
+    console.log('formik values', formik.values);
+    console.log('formik errors', formik.errors);
+
     useEffect(() => {
         if (action === 'edit') {
             setGdriveId(specie?.gdriveid ?? '');
             setImgUrl(`https://drive.google.com/thumbnail?id=${specie?.gdriveid}&sz=w1000`);
         }
     }, []);
-
+    console.log(formik.values?.category)
+    console.log(animalsList.includes(formik.values?.category?.toLowerCase() ?? ""));
     return (
         <div>
             <FormikProvider value={formik}>
@@ -121,121 +122,87 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
                                     <span className="text-xs pl-2 text-red-500">{formik.errors.description}</span>
                                 }
                             </div>
-                            <div className="flex flex-row flex-[2] gap-4">
-                                <div className="flex flex-col flex-1 gap-4">
-                                    <TextField
-                                        placeholder="Scientific name"
-                                        name="scientificName"
-                                        value={formik.values.scientificName}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.scientificName && formik.touched.scientificName}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Common name"
-                                        name="commonName"
-                                        value={formik.values.commonName}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.commonName && formik.touched.commonName}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Kingdom"
-                                        name="kingdom"
-                                        value={formik.values.kingdom}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.kingdom && formik.touched.kingdom}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Phylum"
-                                        name="phylum"
-                                        value={formik.values.phylum}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.phylum && formik.touched.phylum}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Class"
-                                        name="class"
-                                        value={formik.values.class}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.class && formik.touched.class}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Order"
-                                        name="order"
-                                        value={formik.values.order}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.order && formik.touched.order}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Family"
-                                        name="family"
-                                        value={formik.values.family}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.family && formik.touched.family}
-                                        required
-                                    />
+                            <div className="flex flex-col flex-[2] gap-4">
+                                <div className="flex flex-1 flex-row gap-4">
+                                    <div className="flex flex-col flex-1 gap-4">
+                                        <TextField
+                                            placeholder="Scientific name"
+                                            name="scientificName"
+                                            value={formik.values.scientificName}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.scientificName && formik.touched.scientificName}
+                                            required
+                                        />
+                                        <TextField
+                                            placeholder="Common name"
+                                            name="commonName"
+                                            value={formik.values.commonName}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.commonName && formik.touched.commonName}
+                                            required
+                                        />
+                                        <TextField
+                                            placeholder="Kingdom"
+                                            name="kingdom"
+                                            value={formik.values.kingdom}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.kingdom && formik.touched.kingdom}
+                                            required
+                                        />
+                                        <TextField
+                                            placeholder="Phylum"
+                                            name="phylum"
+                                            value={formik.values.phylum}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.phylum && formik.touched.phylum}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="flex flex-col flex-1 gap-4">
+                                        <TextField
+                                            placeholder="Class"
+                                            name="class"
+                                            value={formik.values.class}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.class && formik.touched.class}
+                                            required
+                                        />
+                                        <TextField
+                                            placeholder="Order"
+                                            name="order"
+                                            value={formik.values.order}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.order && formik.touched.order}
+                                            required
+                                        />
+                                        <TextField
+                                            placeholder="Family"
+                                            name="family"
+                                            value={formik.values.family}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.family && formik.touched.family}
+                                            required
+                                        />
+                                        <TextField
+                                            placeholder="Genus"
+                                            name="genus"
+                                            value={formik.values.genus}
+                                            onChange={formik.handleChange}
+                                            error={!!formik.errors.genus && formik.touched.genus}
+                                            required
+                                        />
+                                    </div>
                                 </div>
-                                <div className="flex flex-col flex-1 gap-4">
-                                    <TextField
-                                        placeholder="Genus"
-                                        name="genus"
-                                        value={formik.values.genus}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.genus && formik.touched.genus}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Diet"
-                                        name="diet"
-                                        value={formik.values.diet}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.diet && formik.touched.diet}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Distribution"
-                                        name="distribution"
-                                        value={formik.values.distribution}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.distribution && formik.touched.distribution}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Habitats"
-                                        name="habitats"
-                                        value={formik.values.habitats}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.habitats && formik.touched.habitats}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Conservation Status"
-                                        name="conservationStatus"
-                                        value={formik.values.conservationStatus}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.conservationStatus && formik.touched.conservationStatus}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="Ecological Importance"
-                                        name="ecologicalImportance"
-                                        value={formik.values.ecologicalImportance}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.ecologicalImportance && formik.touched.ecologicalImportance}
-                                        required
-                                    />
-                                    <TextField
-                                        placeholder="IUCN Status"
-                                        name="iucnStatus"
-                                        value={formik.values.iucnStatus}
-                                        onChange={formik.handleChange}
-                                        error={!!formik.errors.iucnStatus && formik.touched.iucnStatus}
-                                    />
+                                <div className="flex flex-1 gap-4">
+                                    {animalsList.includes(formik.values?.category?.toLowerCase() ?? "") &&
+                                        <AnimalsForm />
+                                    }
+                                    {plantsList.includes(formik.values?.category?.toLowerCase() ?? "") &&
+                                        <PlantsForm />
+                                    }
+                                    {insectsList.includes(formik.values?.category?.toLowerCase() ?? "") &&
+                                        <InsectsForm />
+                                    }
                                 </div>
                             </div>
                         </div>

@@ -17,7 +17,7 @@ export interface ICampus {
   deleted_at?: string;
 }
 
-export interface ISpecies {
+export interface ISpecies<T = void> {
   id?: number | string;
   gdriveid?: string;
   avatarUrl?: string;
@@ -31,23 +31,18 @@ export interface ISpecies {
   family?: string;
   genus?: string;
   description?: string;
-  diet?: string;
-  habitats?: string;
-  distribution?: string;
-  iucnStatus?: string;
-  conservationStatus?: string;
-  ecologicalImportance?: string;
+  details?: T;
   created_at?: string;
   updated_at?: string;
   deleted_at?: string;
 }
 
-export interface ICampusSpecies {
+export interface ICampusSpecies<T = void> {
   id?: number | string;
   campus: string;
   campusData?: ICampus;
   species: string;
-  speciesData?: ISpecies;
+  speciesData?: ISpecies<T>;
   longitude: number | string;
   latitude: number | string;
   created_at?: string;
@@ -64,12 +59,12 @@ export interface IActions<T> {
   buttonType?: "submit" | "button" | "reset";
 }
 
-export interface IImages {
+export interface IImages<T = void> {
   id?: number | string;
   imageUrl?: string;
   sourceType?: string;
   species?: string | number;
-  speciesData?: ISpecies;
+  speciesData?: ISpecies<T>;
   updated_at?: string;
   deleted_at?: string;
 }

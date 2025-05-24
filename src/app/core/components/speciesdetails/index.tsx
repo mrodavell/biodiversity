@@ -5,6 +5,11 @@ import fallbackImage from "../../../../assets/fallback-image.jpg";
 import ImageModal from '../imagemodal';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'react-toastify';
+import { animalsList, insectsList, plantsList } from '../../enums/species';
+import { TAnimalsDetails, TInsectDetails, TPlantsDetails } from '../../types/common.types';
+import AnimalsDetails from '../../../modules/dashboard/details/AnimalsDetails';
+import PlantsDetails from '../../../modules/dashboard/details/PlantsDetails';
+import InsectsDetails from '../../../modules/dashboard/details/InsectsDetails';
 
 interface SpeciesProps {
     specie?: ISpecies;
@@ -121,28 +126,15 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
                     </div>
                     <p className="card-text text-justify pl-2 mt-2 text-sm">{specie?.description}</p>
                     <div className="flex flex-col flex-wrap gap-2">
-                        <div className="flex flex-col mt-4">
-                            <span className="font-semibold text-sm">Habitats</span>
-                            <span className='pl-2 mb-2 text-sm'>{specie?.habitats}</span>
-                        </div>
-                        <div className="flex flex-row justify-evenly flex-wrap flex-shrink gap-2">
-                            <div className="border-[1px] rounded-md p-2 flex flex-col flex-1 min-w-64">
-                                <span className="font-semibold text-sm">Distribution:</span>
-                                <span className='text-sm'>{specie?.distribution}</span>
-                            </div>
-                            <div className="border-[1px] rounded-md p-2 flex flex-col flex-1 min-w-64">
-                                <span className="font-semibold text-sm">Conservation Status:</span>
-                                <span className='text-sm'>{specie?.conservationStatus}</span>
-                            </div>
-                            <div className="border-[1px] rounded-md p-2 flex flex-col flex-1 min-w-64">
-                                <span className="font-semibold text-sm">Diet:</span>
-                                <span className='text-sm'>{specie?.diet}</span>
-                            </div>
-                            <div className="border-[1px] rounded-md p-2 flex flex-col flex-1 min-w-64">
-                                <span className="font-semibold text-sm">Ecological Importance :</span>
-                                <span className='text-sm'>{specie?.ecologicalImportance}</span>
-                            </div>
-                        </div>
+                        {animalsList.includes(specie?.category?.toLowerCase() ?? "") &&
+                            <AnimalsDetails specie={specie as ISpecies<TAnimalsDetails>} />
+                        }
+                        {plantsList.includes(specie?.category?.toLowerCase() ?? "") &&
+                            <PlantsDetails specie={specie as ISpecies<TPlantsDetails>} />
+                        }
+                        {insectsList.includes(specie?.category?.toLowerCase() ?? "") &&
+                            <InsectsDetails specie={specie as ISpecies<TInsectDetails>} />
+                        }
                     </div>
                     <div className="divider"></div>
                     <div className="flex flex-1 flex-col">
