@@ -213,16 +213,9 @@ export default function Landing() {
                                         </button>
                                         <div className="flex flex-1 flex-col opacity-80">
                                             <div className="input input-bordered input-md w-[500px] ml-2 flex flex-row items-center">
-                                                {/* <input
-                                                    type="search"
-                                                    className="input w-full focus-within:border-none"
-                                                    placeholder="Search species in this campus"
-                                                />
-                                                <span><FaSearch /></span> */}
                                                 <Autocomplete
                                                     placeholder="Search species in this campus"
                                                     options={filterdOptions ?? options}
-                                                    width="30%"
                                                     onChange={(value) => handleChangeAutocomplete(value)}
                                                     setSelectedValue={(value) => handleSelectedValue(value)}
                                                 />

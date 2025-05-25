@@ -25,7 +25,6 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
     initialSelectedText = "",
     onChange,
     height = '250px',
-    width = '20.5%',
     placeholder = "Search"
 }) => {
 
@@ -65,7 +64,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
     const ResultListComponent = () => {
         return options.length ? (
-            <ul ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-left w-[calc(${width}-2rem)] max-h-[${height}] overflow-x-hidden overflow-y-scroll`}>
+            <ul ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-left w-[450px] max-h-[${height}] overflow-x-hidden overflow-y-scroll`}>
                 {options.map((value) => {
                     let className;
                     if (value.value === selectedValue) {
@@ -79,7 +78,7 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
                 })}
             </ul>
         ) : (
-            <div ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-center w-[calc(${width}-2rem)]`}>
+            <div ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-center w-[450px] `}>
                 <em>No options available.</em>
             </div>
         );
