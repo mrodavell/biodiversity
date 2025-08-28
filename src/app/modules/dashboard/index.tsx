@@ -2,7 +2,7 @@ import SpeciesTable from "./components/tables/SpeciesTable";
 import logo from '../../../assets/ustp-logo-on-white.png';
 import { FaMapMarkedAlt, FaSignOutAlt, FaUniversity } from "react-icons/fa";
 import { Fragment } from "react/jsx-runtime";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../core/lib/supabase";
 import LoadingButton from "../../core/components/loadingbutton";
 import Tabs from "../../core/components/tabs";
@@ -14,16 +14,60 @@ import { toast } from "react-toastify";
 export default function Dashboard() {
 
     const [loading, setLoading] = useState<boolean>(false);
+    const [currentTab, setCurrentTab] = useState<number>(0);
+    const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
     const handleUrl = (index: number) => {
+        setCurrentTab(index);
+
+        // Update URL without redirecting
         const urls = ['', 'species', 'campuses'];
-        window.location.href = `/admin/${urls[index]}`
+        const newUrl = `/admin/${urls[index]}`;
+        window.history.pushState({}, '', newUrl);
     }
 
     const getActiveTab = () => {
         const urls = ['', 'species', 'campuses'];
-        return urls.indexOf(window.location.pathname.split('/').pop() ?? "");
+        const currentPath = window.location.pathname;
+
+        // Extract the last segment after /admin/
+        const pathSegments = currentPath.split('/');
+        const lastSegment = pathSegments[pathSegments.length - 1];
+
+        const result = urls.indexOf(lastSegment);
+
+        if (result === -1) {
+            // Default to first tab and update URL
+            setCurrentTab(0);
+            setIsInitialized(true);
+            window.history.replaceState({}, '', `/admin/${urls[0]}`);
+            return 0;
+        }
+
+        setCurrentTab(result);
+        setIsInitialized(true);
+        return result;
     }
+
+    // Handle browser back/forward buttons
+    const handlePopState = () => {
+        getActiveTab();
+    }
+
+    useEffect(() => {
+        if (!isInitialized) {
+            // Set initial tab based on URL
+            getActiveTab();
+        }
+
+        // Listen for browser back/forward button clicks
+        window.addEventListener('popstate', handlePopState);
+
+        // Cleanup event listener
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [isInitialized])
 
     const handleLogout = async () => {
         try {
@@ -37,6 +81,13 @@ export default function Dashboard() {
         } finally {
             setLoading(false);
         }
+    }
+
+    // Don't render tabs until initialized
+    if (!isInitialized) {
+        return <div className="flex justify-center items-center h-screen">
+            <span>Loading...</span>
+        </div>;
     }
 
     return <Fragment>
@@ -72,7 +123,7 @@ export default function Dashboard() {
                             className="w-full"
                             fullWidthHeader={false}
                             onTabChange={handleUrl}
-                            currentTab={getActiveTab()}
+                            currentTab={currentTab}
                             headers={[
                                 <span className="flex flex-row items-center text-sm hover:text-blue-500"><FaMapMarkedAlt className="mr-2" /> Mapping</span>,
                                 <span className="flex flex-row items-center text-sm hover:text-blue-500"><FaDatabase className="mr-2" /> Species</span>,

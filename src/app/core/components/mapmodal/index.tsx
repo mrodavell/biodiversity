@@ -5,9 +5,11 @@ import { MapContainer, Marker, TileLayer, ZoomControl, Tooltip, useMapEvents, us
 import osmMaptiler from '../../constants/osm-maptiler';
 import schoolPin from '../../../../assets/schoolmap-pin.png'
 import mapPin from '../../../../assets/map-pin.png'
+// import speciesPin from '../../../../assets/species-pin.png' // Add a species pin icon
 import { ICampus } from '../../interfaces/common.interface';
 import { useCampusStore } from '../../zustand/campus';
 import React from 'react';
+import { supabase } from '../../lib/supabase';
 
 
 type MapComponentProps = {
@@ -15,6 +17,21 @@ type MapComponentProps = {
     campuses: ICampus[];
     initialCoordinates?: LatLngExpression | null;
     getLongLat?: (latlang: number[]) => void;
+};
+
+type CampusSpeciesData = {
+    id: number;
+    campus: string;
+    species: {
+        id: number;
+        commonName: string;
+        scientificName: string;
+        category: string;
+    } | null;
+    latitude: number;
+    longitude: number;
+    created_at: string;
+    // Add other fields as needed based on your schema
 };
 
 // Define a custom icon
@@ -28,7 +45,7 @@ const customIcon = L.icon({
 });
 
 
-// Define a custom icon
+// Define a school icon
 const schoolIcon = L.icon({
     iconUrl: schoolPin, // URL to your custom icon
     iconSize: [50, 50], // Size of the icon [width, height]
@@ -38,11 +55,59 @@ const schoolIcon = L.icon({
     shadowAnchor: [22, 94] // Anchor point for the shadow
 });
 
+// Define a species icon
+const speciesIcon = L.icon({
+    iconUrl: mapPin, // You'll need to add this icon
+    iconSize: [25, 40],
+    iconAnchor: [12, 40],
+    popupAnchor: [0, -40],
+    shadowSize: [41, 41],
+    shadowAnchor: [10, 40]
+});
+
 const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, initialCoordinates, getLongLat }) => {
 
     const [coordinates, setCoordinates] = React.useState<LatLngExpression>([Number(campuses[0].longitude), Number(campuses[0].latitude)]);
     const { setCampus } = useCampusStore();
     const [pinLocation, setPinLocation] = React.useState<LatLngExpression | null>(initialCoordinates ?? null);
+    const [campusSpecies, setCampusSpecies] = React.useState<CampusSpeciesData[]>([]);
+
+    const getAllCampusSpecies = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('campus_species')
+                .select(`
+                    *,
+                    species:species(
+                        id,
+                        commonName,
+                        scientificName,
+                        category
+                    ),
+                    campus:campus(
+                        id,
+                        campus
+                    )
+                `)
+                .eq('campus', initialCampus)
+                .not('latitude', 'is', null)
+                .not('longitude', 'is', null);
+
+            if (error) {
+                console.error('Error fetching campus species:', error);
+                return;
+            }
+
+            console.log('Campus species data:', data);
+            setCampusSpecies(data || []);
+        } catch (error) {
+            console.error('Error in getAllCampusSpecies:', error);
+        }
+    }
+
+    useEffect(() => {
+        getAllCampusSpecies();
+    }, [initialCampus]);
 
     useEffect(() => {
         const campus = campuses.find(campus => {
@@ -50,14 +115,13 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
         });
         setCampus(campus ?? null);
         setCoordinates([Number(campus?.longitude), Number(campus?.latitude)]);
-    }, []);
+    }, [initialCampus]);
 
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
         map.setView(coordinates, 17);
         return null;
     }
-
 
     const LongLatGetter = () => {
         useMapEvents({
@@ -79,39 +143,71 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
                         url={osmMaptiler.maptiler.url}
                         attribution={osmMaptiler.maptiler.attribution}
                     />
-                    {
-                        campuses.map((campus, index) => (
-                            <Marker
-                                key={index}
-                                position={[Number(campus.longitude), Number(campus.latitude)]}
-                                icon={schoolIcon}
-                            >
-                                <Tooltip>
-                                    <div>
-                                        <strong>{campus.campus} Campus</strong>
-                                    </div>
-                                </Tooltip>
-                            </Marker>
-                        ))
-                    }
-                    {
-                        pinLocation && (
-                            <Marker
-                                position={pinLocation}
-                                icon={customIcon}
-                            >
-                                <Tooltip>
-                                    <div>
-                                        <strong>Selected Location</strong>
-                                    </div>
-                                </Tooltip>
-                            </Marker>
-                        )
-                    }
+
+                    {/* Campus markers */}
+                    {campuses.map((campus, index) => (
+                        <Marker
+                            key={`campus-${index}`}
+                            position={[Number(campus.longitude), Number(campus.latitude)]}
+                            icon={schoolIcon}
+                        >
+                            <Tooltip>
+                                <div>
+                                    <strong>{campus.campus} Campus</strong>
+                                </div>
+                            </Tooltip>
+                        </Marker>
+                    ))}
+
+                    {/* Species markers */}
+                    {campusSpecies.map((speciesData, index) => (
+                        <Marker
+                            key={`species-${index}`}
+                            position={[Number(speciesData.latitude), Number(speciesData.longitude)]}
+                            icon={speciesIcon}
+                        >
+                            <Tooltip>
+                                <div className="text-sm">
+                                    <strong>{speciesData.species?.commonName || 'Unknown Species'}</strong>
+                                    <br />
+                                    <em>{speciesData.species?.scientificName}</em>
+                                    <br />
+                                    <span className="text-xs text-gray-600">
+                                        Category: {speciesData.species?.category}
+                                    </span>
+                                    <br />
+                                    <span className="text-xs text-gray-500">
+                                        Lat: {Number(speciesData.latitude).toFixed(6)},
+                                        Lng: {Number(speciesData.longitude).toFixed(6)}
+                                    </span>
+                                </div>
+                            </Tooltip>
+                        </Marker>
+                    ))}
+
+                    {/* Selected location marker */}
+                    {pinLocation && (
+                        <Marker
+                            position={pinLocation}
+                            icon={customIcon}
+                        >
+                            <Tooltip>
+                                <div>
+                                    <strong>Selected Location</strong>
+                                </div>
+                            </Tooltip>
+                        </Marker>
+                    )}
+
                     <ZoomControl position='bottomright' />
                     <MoveTo coordinates={coordinates} />
                     <LongLatGetter />
                 </MapContainer>
+            </div>
+
+            {/* Species count info */}
+            <div className="mt-2 text-sm text-gray-600">
+                Showing {campusSpecies.length} species locations on the map
             </div>
         </div>
     )

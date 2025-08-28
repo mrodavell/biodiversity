@@ -54,7 +54,6 @@ const Tabs: FC<TTabsProps> = ({
 
     // State to keep track of the active tab index, defaulting to the first tab
     const [activeTab, setActiveTab] = useState<number | string>(currentTab ?? 0);
-
     // Handler to update the active tab index
     const handleActiveTab = (index: number) => {
         setActiveTab(index);

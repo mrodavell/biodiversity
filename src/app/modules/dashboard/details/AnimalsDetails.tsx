@@ -7,6 +7,7 @@ interface Props {
 }
 
 const AnimalsDetails: React.FC<Props> = ({ specie }) => {
+    console.log(specie)
     return <Fragment>
         <div className="flex flex-col flex-wrap gap-2">
             <div className="flex flex-col flex-wrap">
@@ -27,7 +28,7 @@ const AnimalsDetails: React.FC<Props> = ({ specie }) => {
                         <span className="font-semibold text-sm">Ecological Importance :</span>
                         <span className='text-sm'>{specie?.details?.ecologicalImportance}</span>
                     </div>
-                    {specie?.details?.endemism !== '' &&
+                    {specie?.details?.endemism && specie?.details?.endemism !== '' &&
                         <div className="border-[1px] rounded-md p-2 flex flex-col flex-1 min-w-64">
                             <span className="font-semibold text-sm">Endemism:</span>
                             <span className='text-sm'>{specie?.details?.endemism}</span>
