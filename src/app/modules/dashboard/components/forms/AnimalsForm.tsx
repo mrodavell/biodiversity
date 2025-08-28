@@ -43,6 +43,13 @@ const BirdsForm: FC = () => {
                         error={getIn(formikContext.errors.details, 'habitats') && getIn(formikContext.touched.details, 'habitats')}
                         required
                     />
+                    <TextField
+                        placeholder="Endemism"
+                        name="endemism"
+                        value={formikContext.values.details?.endemism}
+                        onChange={handleChange}
+                        error={getIn(formikContext.errors.details, 'endemism') && getIn(formikContext.touched.details, 'endemism')}
+                    />
                 </div>
                 <div className="flex flex-1 flex-col gap-4">
                     <TextField

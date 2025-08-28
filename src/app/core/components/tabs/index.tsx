@@ -22,6 +22,7 @@ type TTabsProps = {
     inActiveTabClassName?: string;
     onTabChange?: (activeTab: number) => void;
     fullWidthHeader?: boolean;
+    currentTab?: number;
 };
 
 // Define the Tabs component using the functional component syntax
@@ -44,6 +45,7 @@ const Tabs: FC<TTabsProps> = ({
     inActiveTabClassName,
     onTabChange,
     fullWidthHeader = true,
+    currentTab
 }) => {
     // Check if headers and contents arrays are of the same length and warn if not
     if (headers?.length !== contents?.length) {
@@ -51,7 +53,7 @@ const Tabs: FC<TTabsProps> = ({
     }
 
     // State to keep track of the active tab index, defaulting to the first tab
-    const [activeTab, setActiveTab] = useState<number | string>(0);
+    const [activeTab, setActiveTab] = useState<number | string>(currentTab ?? 0);
 
     // Handler to update the active tab index
     const handleActiveTab = (index: number) => {

@@ -5,6 +5,7 @@ export type TAnimalsDetails = {
   iucnStatus: string;
   conservationStatus: string;
   ecologicalImportance: string;
+  endemism?: string;
 };
 
 export type TPlantsDetails = {

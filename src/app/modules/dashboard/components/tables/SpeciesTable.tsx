@@ -1,6 +1,6 @@
 import DataTable, { TableColumn } from "react-data-table-component";
 import { IActions, ISpecies } from "../../../../core/interfaces/common.interface";
-import { FaArchive, FaCog, FaImage, FaImages, FaListAlt, FaPlusCircle, FaRegEdit, FaSearch, FaTrashRestore } from "react-icons/fa";
+import { FaArchive, FaCog, FaFileCsv, FaImage, FaImages, FaListAlt, FaPlusCircle, FaRegEdit, FaSearch, FaTrashRestore } from "react-icons/fa";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useSpeciesStore } from "../../../../core/zustand/species";
 import Loader from "../../../../core/components/loader";
@@ -13,10 +13,11 @@ import { TbHierarchy2 } from "react-icons/tb";
 import SpeciesDetails from "../../../../core/components/speciesdetails";
 import CapturedImagesForm from "../forms/CapturedImagesForm";
 import Select from "../../../../core/components/select";
+import BulkUploadForm from "../forms/BulkUploadForm";
 
 const SpeciesTable = () => {
 
-    const { setSpecie, getSpecies, deleteSpecie, restoreSpecie, searchSpecies, filterSpeciesByCategory } = useSpeciesStore();
+    const { setCategory, setSpecie, getSpecies, deleteSpecie, restoreSpecie, searchSpecies, filterSpeciesByCategory } = useSpeciesStore();
     const species = useSpeciesStore(state => state.species);
     const specie = useSpeciesStore(state => state.specie);
     const categories = useSpeciesStore(state => state.categories);
@@ -33,6 +34,8 @@ const SpeciesTable = () => {
     const toggleAddImagesModal = () => setAddImagesModal(!addImagesModal);
     const [speciesDetailsModal, setSpeciesDetailsModal] = useState<boolean>(false);
     const toggleSpeciesDetailsModal = () => setSpeciesDetailsModal(!speciesDetailsModal);
+    const [bulkModal, setBulkModal] = useState<boolean>(false);
+    const toggleBulkModal = () => setBulkModal(!bulkModal);
 
     const commonSetting = {
     };
@@ -190,6 +193,7 @@ const SpeciesTable = () => {
     };
 
     const handleChangeCategory = (category: string) => {
+        setCategory(category);
         filterSpeciesByCategory(category);
     }
 
@@ -238,6 +242,13 @@ const SpeciesTable = () => {
                 </Modal>
             )
         }
+        {
+            bulkModal && (
+                <Modal title={`Bulk Upload Species`} isOpen={bulkModal} onClose={toggleBulkModal} modalContainerClassName="max-w-3xl">
+                    <BulkUploadForm toggleModal={toggleBulkModal} />
+                </Modal>
+            )
+        }
         <div className="flex flex-1 flex-col w-full px-10 pt-4">
             <div className="flex flex-row justify-between mb-4">
                 <div className="flex flex-row w-[80%] justify-start items-center">
@@ -265,12 +276,18 @@ const SpeciesTable = () => {
                         <span className="ml-2">Include Archived</span>
                     </div>
                 </div>
-                <div className="w-[25%] flex justify-end">
+                <div className="w-[25%] flex justify-end gap-x-2">
                     <button
                         className="btn btn-success btn-sm text-white"
                         onClick={handleAdd}
                     >
                         <FaPlusCircle className="mr-2" /> Add Specie
+                    </button>
+                    <button
+                        className="btn btn-success btn-sm text-white"
+                        onClick={toggleBulkModal}
+                    >
+                        <FaFileCsv className="mr-2" /> Bulk Upload
                     </button>
                 </div>
             </div>

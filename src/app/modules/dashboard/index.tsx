@@ -15,6 +15,16 @@ export default function Dashboard() {
 
     const [loading, setLoading] = useState<boolean>(false);
 
+    const handleUrl = (index: number) => {
+        const urls = ['', 'species', 'campuses'];
+        window.location.href = `/admin/${urls[index]}`
+    }
+
+    const getActiveTab = () => {
+        const urls = ['', 'species', 'campuses'];
+        return urls.indexOf(window.location.pathname.split('/').pop() ?? "");
+    }
+
     const handleLogout = async () => {
         try {
             setLoading(true);
@@ -61,6 +71,8 @@ export default function Dashboard() {
                         <Tabs
                             className="w-full"
                             fullWidthHeader={false}
+                            onTabChange={handleUrl}
+                            currentTab={getActiveTab()}
                             headers={[
                                 <span className="flex flex-row items-center text-sm hover:text-blue-500"><FaMapMarkedAlt className="mr-2" /> Mapping</span>,
                                 <span className="flex flex-row items-center text-sm hover:text-blue-500"><FaDatabase className="mr-2" /> Species</span>,

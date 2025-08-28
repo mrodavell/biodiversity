@@ -66,17 +66,13 @@ const SpeciesForm: FC<NewSpeciesFormProps> = ({ action = 'add', toggleModal }) =
         }
     });
 
-    console.log('formik values', formik.values);
-    console.log('formik errors', formik.errors);
-
     useEffect(() => {
         if (action === 'edit') {
             setGdriveId(specie?.gdriveid ?? '');
             setImgUrl(`https://drive.google.com/thumbnail?id=${specie?.gdriveid}&sz=w1000`);
         }
     }, []);
-    console.log(formik.values?.category)
-    console.log(animalsList.includes(formik.values?.category?.toLowerCase() ?? ""));
+
     return (
         <div>
             <FormikProvider value={formik}>

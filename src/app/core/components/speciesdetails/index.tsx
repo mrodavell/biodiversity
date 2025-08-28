@@ -56,8 +56,12 @@ const SpeciesDetails: React.FC<SpeciesProps> = ({ specie }) => {
 
     return <Fragment>
         {imageModal && <ImageModal isOpen={imageModal} onClose={toggleImageModal}>
-            <div className="flex flex-col">
-                <img src={selectedImage} alt='Zoomed in avatar' className="w-[450px] h-full" />
+            <div className="flex flex-col items-center justify-center w-full h-full">
+                <img
+                    src={selectedImage}
+                    alt='Zoomed in avatar'
+                    className="max-w-full max-h-full w-auto h-auto object-contain"
+                />
             </div>
         </ImageModal>
         }

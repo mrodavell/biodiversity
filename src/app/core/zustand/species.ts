@@ -8,6 +8,7 @@ import { confirmArchive, confirmRestore } from "../helpers/alerts";
 const table = "species";
 
 type Species = {
+  category: string;
   categories: { value: string; text: string }[];
   speciesByCategory: { value: string; text: string }[];
   species: ISpecies[];
@@ -18,6 +19,7 @@ type Species = {
 type SpeciesActions = {
   setSpecie: (specie: ISpecies | null) => void;
   setSpecies: (species: ISpecies[]) => void;
+  setCategory: (category: string) => void;
   getSpecies: (isIncludeArchived: boolean) => void;
   getSpecie: (id: string) => void;
   createSpecie: (data: ISpecies, callback?: () => void) => void;
@@ -31,10 +33,12 @@ type SpeciesActions = {
 };
 
 export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
+  category: "",
   categories: [
     { value: "Birds", text: "Birds" },
     { value: "Bats", text: "Bats" },
     { value: "Butterfly", text: "Butterfly" },
+    { value: "Damselfly", text: "Damselfly" },
     { value: "Dragonfly", text: "Dragonfly" },
     { value: "Frogs", text: "Frogs" },
     { value: "Trees", text: "Trees" },
@@ -47,6 +51,7 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
   processing: false,
   setSpecie: (specie) => set({ specie }),
   setSpecies: (species) => set({ species }),
+  setCategory: (category) => set({ category }),
   getSpecies: async (isIncludeArchived = false) => {
     try {
       set({ processing: true });
@@ -55,7 +60,7 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
         response = await supabase
           .from(table)
           .select("*")
-          .order("id", { ascending: true })
+          .order("id")
           .is("deleted_at", null);
       } else {
         response = await supabase.from(table).select("*");
@@ -101,7 +106,12 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
         return;
       }
       toast.success("Specie created successfully!");
-      get().getSpecies(false);
+      if (get().category && get().category !== "") {
+        get().filterSpeciesByCategory(get().category);
+      } else {
+        get().setCategory("");
+        get().getSpecies(false);
+      }
       if (callback) {
         callback();
       }
@@ -123,7 +133,13 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
         return false;
       }
       toast.success("Specie updated successfully!");
-      get().getSpecies(false);
+      if (get().category && get().category !== "") {
+        get().filterSpeciesByCategory(get().category);
+      } else {
+        get().setCategory("");
+        get().getSpecies(false);
+      }
+
       if (callback) {
         callback();
       }
@@ -270,7 +286,7 @@ export const useSpeciesStore = create<Species & SpeciesActions>((set, get) => ({
         .from(table)
         .select("*")
         .eq("category", category)
-        .order("id", { ascending: false })
+        .order("id")
         .is("deleted_at", null);
       if (response.error) {
         toast.error(response.error.message);

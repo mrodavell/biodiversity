@@ -17,6 +17,14 @@ export const router = createBrowserRouter([
         element: <Admin />
     },
     {
+        path: "/admin/species",
+        element: <Admin />
+    },
+    {
+        path: "/admin/campuses",
+        element: <Admin />
+    },
+    {
         path: "*",
         element: <Notfound />
     }

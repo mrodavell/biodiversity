@@ -59,7 +59,7 @@ const ImageModal: FC<Props> = ({
     return (
         <div ref={modalRef} id="custom-modal" tabIndex={-1} className={`fixed inset-0 z-1500 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto ${className}`}>
             <div className="fixed inset-0 bg-black opacity-70"></div>
-            <div ref={modalContainerRef} className="bg-white p-2 border-2 relative max-h-full">{children}</div>
+            <div ref={modalContainerRef} className="p-2 relative max-h-full">{children}</div>
         </div>
     );
 };
