@@ -4,8 +4,8 @@ import L, { LatLngExpression } from "leaflet";
 import { MapContainer, Marker, TileLayer, ZoomControl, Tooltip, useMapEvents, useMap } from "react-leaflet";
 import osmMaptiler from '../../constants/osm-maptiler';
 import schoolPin from '../../../../assets/schoolmap-pin.png'
-import mapPin from '../../../../assets/map-pin.png'
-// import speciesPin from '../../../../assets/species-pin.png' // Add a species pin icon
+import mapPin from '../../../../assets/pin2.png'
+import targetPin from '../../../../assets/location-add.gif'
 import { ICampus } from '../../interfaces/common.interface';
 import { useCampusStore } from '../../zustand/campus';
 import React from 'react';
@@ -36,8 +36,8 @@ type CampusSpeciesData = {
 
 // Define a custom icon
 const customIcon = L.icon({
-    iconUrl: mapPin, // URL to your custom icon
-    iconSize: [30, 50], // Size of the icon [width, height]
+    iconUrl: targetPin, // URL to your custom icon
+    iconSize: [50, 50], // Size of the icon [width, height]
     iconAnchor: [19, 38], // Anchor point of the icon [x, y]
     popupAnchor: [0, -38], // Anchor for the popup [x, y]
     shadowSize: [68, 95], // Size of the shadow
@@ -58,7 +58,7 @@ const schoolIcon = L.icon({
 // Define a species icon
 const speciesIcon = L.icon({
     iconUrl: mapPin, // You'll need to add this icon
-    iconSize: [25, 40],
+    iconSize: [30, 30],
     iconAnchor: [12, 40],
     popupAnchor: [0, -40],
     shadowSize: [41, 41],

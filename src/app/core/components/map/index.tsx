@@ -3,9 +3,9 @@ import { FC, Fragment, useEffect, useState } from 'react';
 import L, { LatLngExpression } from "leaflet";
 import { MapContainer, Marker, TileLayer, useMap, ZoomControl, Tooltip } from "react-leaflet";
 import osmMaptiler from '../../constants/osm-maptiler';
-import mapPin from '../../../../assets/map-pin.png'
+import mapPin from '../../../../assets/pin2.png'
 import schoolPin from '../../../../assets/schoolmap-pin.png'
-import activePin from '../../../../assets/active-mark.png'
+import activePin from '../../../../assets/animated-map-pin.gif'
 import { ICampus, ICampusSpecies } from '../../interfaces/common.interface';
 import { useSearchParams } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ type MapComponentProps = {
 // Define a custom icon
 const customIcon = L.icon({
     iconUrl: mapPin, // URL to your custom icon
-    iconSize: [25, 40], // Size of the icon [width, height]
+    iconSize: [30, 30], // Size of the icon [width, height]
     iconAnchor: [19, 38], // Anchor point of the icon [x, y]
     popupAnchor: [0, -38], // Anchor for the popup [x, y]
     shadowSize: [68, 95], // Size of the shadow
@@ -28,7 +28,7 @@ const customIcon = L.icon({
 // Define a custom icon
 const customIconActive = L.icon({
     iconUrl: activePin, // URL to your custom icon
-    iconSize: [40, 40], // Size of the icon [width, height]
+    iconSize: [60, 60], // Size of the icon [width, height]
     iconAnchor: [19, 38], // Anchor point of the icon [x, y]
     popupAnchor: [0, -38], // Anchor for the popup [x, y]
     shadowSize: [68, 95], // Size of the shadow
@@ -38,7 +38,7 @@ const customIconActive = L.icon({
 // Define a custom icon
 const schoolIcon = L.icon({
     iconUrl: schoolPin, // URL to your custom icon
-    iconSize: [55, 55], // Size of the icon [width, height]
+    iconSize: [50, 50], // Size of the icon [width, height]
     iconAnchor: [19, 38], // Anchor point of the icon [x, y]
     popupAnchor: [0, -38], // Anchor for the popup [x, y]
     shadowSize: [68, 95], // Size of the shadow
