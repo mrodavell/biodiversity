@@ -64,32 +64,36 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
 
     const ResultListComponent = () => {
         return options.length ? (
-            <ul ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-left w-[450px] max-h-[${height}] overflow-x-hidden overflow-y-scroll`}>
+            <ul
+                ref={suggestionsRef}
+                className="z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-left w-[450px] overflow-x-hidden overflow-y-auto"
+                style={{ maxHeight: height }}
+            >
                 {options.map((value) => {
                     let className;
                     if (value.value === selectedValue) {
                         className = "suggestion-active";
                     }
                     return (
-                        <li className={`hover:bg-zinc-200 hover:cursor-pointer px-2 ${className}`} key={value.value} onClick={() => handleSelectedValue(value.text, value.value)}>
+                        <li className={`hover:bg-zinc-200 hover:cursor-pointer px-2 py-1 ${className}`} key={value.value} onClick={() => handleSelectedValue(value.text, value.value)}>
                             {value.text}
                         </li>
                     );
                 })}
             </ul>
         ) : (
-            <div ref={suggestionsRef} className={`z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-center w-[450px] `}>
+            <div ref={suggestionsRef} className="z-10 bg-white p-2 absolute mt-8 border border-gray-200 text-center w-[450px]">
                 <em>No options available.</em>
             </div>
         );
     };
 
     return (
-        <div className="autocomplete flex flex-col flex-1 ">
+        <div className="autocomplete flex flex-col flex-1 relative">
             <TextField
                 className='input-sm'
                 placeholder={placeholder}
-                type="text"
+                type="search"
                 onChange={e => handleOnChange(e.target.value)}
                 onFocus={handleFocus}
                 value={selectedText}

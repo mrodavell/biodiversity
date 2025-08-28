@@ -7,7 +7,7 @@ interface Props {
 }
 
 const AnimalsDetails: React.FC<Props> = ({ specie }) => {
-    console.log(specie)
+
     return <Fragment>
         <div className="flex flex-col flex-wrap gap-2">
             <div className="flex flex-col flex-wrap">

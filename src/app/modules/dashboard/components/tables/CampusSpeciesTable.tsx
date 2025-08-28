@@ -133,7 +133,9 @@ const CampusSpeciesTable = () => {
                 editCampusSpecie(values);
             } else {
                 createCampusSpecie(values);
-                formik.resetForm();
+                formik.setFieldValue('longitude', '');
+                formik.setFieldValue('latitude', '');
+                formik.setFieldValue('species', '');
             }
         }
     })
