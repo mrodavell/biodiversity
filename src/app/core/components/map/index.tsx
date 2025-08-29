@@ -51,7 +51,7 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
     const [searchParams] = useSearchParams();
     const campusId = searchParams.get('campusId');
     const coordinatesParams = searchParams.get('coordinates');
-    const zoomLevel = Number(searchParams.get('zoom')) != 0 ? Number(searchParams.get('zoom')) : 17;
+    const zoomLevel = Number(searchParams.get('zoom')) != 0 ? Number(searchParams.get('zoom')) : 40;
     const [coordinates, setCoordinates] = useState<LatLngExpression>([0, 0]);
     const [imageLoaded, setImageLoaded] = useState<boolean>(false);
 
@@ -68,7 +68,7 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
 
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
-        map.setView(coordinates, zoomLevel ?? 17);
+        map.setView(coordinates, zoomLevel ?? 40);
         return null;
     }
 
@@ -79,7 +79,7 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
     return (
         <Fragment>
             <div className="w-full h-screen">
-                <MapContainer center={coordinates} zoom={zoomLevel ?? 17} scrollWheelZoom={true} zoomControl={false}>
+                <MapContainer center={coordinates} zoom={zoomLevel ?? 40} scrollWheelZoom={true} zoomControl={false}>
                     <TileLayer
                         url={osmMaptiler.maptiler.url}
                         attribution={osmMaptiler.maptiler.attribution}

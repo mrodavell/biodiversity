@@ -119,7 +119,7 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
 
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
-        map.setView(coordinates, 17);
+        map.setView(coordinates, 40);
         return null;
     }
 
@@ -138,7 +138,7 @@ const MapModalComponent: FC<MapComponentProps> = ({ initialCampus, campuses, ini
     return (
         <div className="w-full">
             <div className='w-full !h-[550px] overflow-hidden overflow-y-auto'>
-                <MapContainer center={coordinates} zoom={17} scrollWheelZoom={true} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+                <MapContainer center={coordinates} zoom={40} scrollWheelZoom={true} zoomControl={false} style={{ height: '100%', width: '100%' }}>
                     <TileLayer
                         url={osmMaptiler.maptiler.url}
                         attribution={osmMaptiler.maptiler.attribution}
