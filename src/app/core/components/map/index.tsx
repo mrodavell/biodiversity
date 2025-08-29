@@ -8,6 +8,7 @@ import schoolPin from '../../../../assets/schoolmap-pin.png'
 import activePin from '../../../../assets/animated-map-pin.gif'
 import { ICampus, ICampusSpecies } from '../../interfaces/common.interface';
 import { useSearchParams } from 'react-router-dom';
+import fallbackImage from "../../../../assets/fallback-image.jpg";
 
 type MapComponentProps = {
     campuses: ICampus[];
@@ -50,7 +51,9 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
     const [searchParams] = useSearchParams();
     const campusId = searchParams.get('campusId');
     const coordinatesParams = searchParams.get('coordinates');
+    const zoomLevel = Number(searchParams.get('zoom')) != 0 ? Number(searchParams.get('zoom')) : 17;
     const [coordinates, setCoordinates] = useState<LatLngExpression>([0, 0]);
+    const [imageLoaded, setImageLoaded] = useState<boolean>(false);
 
     useEffect(() => {
         if (campusId && coordinatesParams) {
@@ -65,7 +68,7 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
 
     const MoveTo = ({ coordinates }: { coordinates: LatLngExpression }) => {
         const map = useMap();
-        map.setView(coordinates, 17);
+        map.setView(coordinates, zoomLevel ?? 17);
         return null;
     }
 
@@ -73,13 +76,10 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
         handleModal(data);
     }
 
-
-
     return (
         <Fragment>
-
             <div className="w-full h-screen">
-                <MapContainer center={coordinates} zoom={17} scrollWheelZoom={true} zoomControl={false}>
+                <MapContainer center={coordinates} zoom={zoomLevel ?? 17} scrollWheelZoom={true} zoomControl={false}>
                     <TileLayer
                         url={osmMaptiler.maptiler.url}
                         attribution={osmMaptiler.maptiler.attribution}
@@ -97,8 +97,45 @@ const MapComponent: FC<MapComponentProps> = ({ campuses, campusSpecies, handleMo
                                 }}
                             >
                                 <Tooltip>
-                                    <div>
-                                        <strong>{data.speciesData?.commonName}</strong>
+                                    <div className="flex flex-row text-sm">
+                                        <div className='border-r-2 w-20 mr-2'>
+                                            {data.speciesData?.gdriveid &&
+                                                <img
+                                                    src={`https://drive.google.com/thumbnail?id=${data.speciesData.gdriveid}&sz=w1000`}
+                                                    alt={data.speciesData.commonName ?? ''}
+                                                    onLoad={() => setImageLoaded(true)}
+                                                    className={`hover:cursor-pointer hover:opacity-90 ${imageLoaded ? 'block' : 'hidden'}`}
+                                                    onError={e => e.currentTarget.src = fallbackImage}
+                                                    width={75}
+                                                />
+                                            }
+                                            {
+                                                !data.speciesData?.gdriveid &&
+                                                <div className="flex justify-center">
+                                                    <img
+                                                        src={`https://drive.google.com/thumbnail?id=${data.speciesData?.gdriveid}&sz=w1000`}
+                                                        alt={data.speciesData?.commonName ?? ''}
+                                                        onLoad={() => setImageLoaded(true)}
+                                                        className={`hover:cursor-pointer hover:opacity-90 ${imageLoaded ? 'block' : 'hidden'}`}
+                                                        onError={e => e.currentTarget.src = fallbackImage}
+                                                    />
+                                                </div>
+                                            }
+                                        </div>
+                                        <div>
+                                            <strong>{data.speciesData?.commonName || 'Unknown Species'}</strong>
+                                            <br />
+                                            <em>{data.speciesData?.scientificName}</em>
+                                            <br />
+                                            <span className="text-xs text-gray-600">
+                                                Category: {data.speciesData?.category}
+                                            </span>
+                                            <br />
+                                            <span className="text-xs text-gray-500">
+                                                Lat: {Number(data.latitude).toFixed(6)},
+                                                Lng: {Number(data.longitude).toFixed(6)}
+                                            </span>
+                                        </div>
                                     </div>
                                 </Tooltip>
                             </Marker>

@@ -118,7 +118,7 @@ export default function Landing() {
     const handleChangeCampus = (value: string) => {
         const campusData = campuses.find(campus => campus.id?.toString() === value.toString());
         if (campusData) {
-            window.location.href = `?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}`;
+            window.location.href = `?campusId=${campusData.id}&coordinates=${campusData.latitude},${campusData.longitude}&zoom=${campusData.zoom}`;
         }
     }
 
